@@ -1,0 +1,19 @@
+{% extends 'dondesong/base.html' %}
+{% block title %}Hôpitaux{% endblock %}
+{% block content %}
+<h2 class="text-center">Enregistrer un hôpital</h2>
+<form method="post" class="mx-auto" style="max-width:500px;">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-danger w-100">Enregistrer</button>
+</form>
+<hr>
+<h2 class="text-center">Hôpitaux partenaires</h2>
+<ul class="list-group w-75 mx-auto">
+    {% for hopital in hopitaux %}
+        <li class="list-group-item">{{ hopital.nom }} – {{ hopital.ville }} – Agrément : {{ hopital.agrement }}</li>
+    {% empty %}
+        <p class="text-center">Aucun hôpital.</p>
+    {% endfor %}
+</ul>
+{% endblock %}

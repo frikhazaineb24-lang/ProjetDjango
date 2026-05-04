@@ -1,0 +1,44 @@
+{% extends 'dondesong/base.html' %}
+{% block title %}Campagnes{% endblock %}
+
+{% block content %}
+<h2 class="text-center mb-4">Créer une campagne</h2>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+  {% endfor %}
+{% endif %}
+
+<form method="post" class="mx-auto" style="max-width:500px;">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="mb-3">
+        <label class="form-label fw-semibold">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-danger w-100">Créer la campagne</button>
+</form>
+
+<hr>
+<h2 class="text-center mb-3">Campagnes disponibles</h2>
+<div class="row w-75 mx-auto">
+  {% for c in campagnes %}
+    <div class="col-12 mb-3">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">{{ c.nom }}</h5>
+          <p class="card-text">
+            📅 {{ c.date }} – 📍 {{ c.lieu }}<br>
+            Groupes cibles : {{ c.groupes_cibles }} – Capacité : {{ c.capacite_totale }}
+          </p>
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <p class="text-center text-muted">Aucune campagne enregistrée.</p>
+  {% endfor %}
+</div>
+{% endblock %}
