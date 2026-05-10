@@ -12,4 +12,8 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('deconexion/', auth_views.LogoutView.as_view(next_page='index'), name='logout'),
+    path('creneaux/', views.creneau_list, name='creneau_list'),
+    path('creneaux/<int:id>/', views.creneau_detail, name='creneau_detail'),
+    path('inscription/<int:id>/', views.inscription_creneau, name='inscription_creneau'),
+    path('dashboard_donneur/', views.dashboard_donneur, name='dashboard_donneur'),
 ]

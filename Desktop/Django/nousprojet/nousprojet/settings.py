@@ -110,8 +110,8 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
-
 STATIC_URL = 'static/'
+
 
 # Pour gérer les fichiers uploadés (optionnel, décommente si besoin)
 # MEDIA_URL = '/media/'
@@ -122,10 +122,8 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Configuration de l'authentification (optionnel, mais souvent utile)
-LOGIN_URL = 'login'          # pour rediriger vers la page de connexion si @login_required
-LOGIN_REDIRECT_URL = 'index' # page après connexion réussie
-# Auth redirects
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
-LOGIN_URL = '/login/'
+# Authentication settings
+
+LOGIN_URL = '/login/'          # page de connexion
+LOGIN_REDIRECT_URL = '/'       # après connexion réussie
+LOGOUT_REDIRECT_URL = '/login/'  # après déconnexion

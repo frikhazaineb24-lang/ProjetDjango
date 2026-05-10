@@ -125,47 +125,41 @@ class Don(models.Model):
 class Campagne(models.Model):
 
     GROUPES_SANGUINS_CHOICES = [
-        ('A+', 'A+'),
-        ('A-', 'A-'),
-        ('B+', 'B+'),
-        ('B-', 'B-'),
-        ('AB+', 'AB+'),
-        ('AB-', 'AB-'),
-        ('O+', 'O+'),
-        ('O-', 'O-'),
+        ('A+', 'A+'), ('A-', 'A-'),
+        ('B+', 'B+'), ('B-', 'B-'),
+        ('AB+', 'AB+'), ('AB-', 'AB-'),
+        ('O+', 'O+'), ('O-', 'O-'),
     ]
 
-    hopital = models.ForeignKey(
-        'Hopital',
-        on_delete=models.CASCADE,
-        related_name='campagnes'
-    )
+    hopital = models.ForeignKey('Hopital', on_delete=models.CASCADE, related_name='campagnes')
 
     nom = models.CharField(max_length=150)
-
     date = models.DateField()
-
     lieu = models.CharField(max_length=255)
 
-    groupes_cibles = models.CharField(
-        max_length=50,
-        choices=GROUPES_SANGUINS_CHOICES
-    )
-
-    capacite_totale = models.IntegerField()
+    groupes_cibles = models.CharField(max_length=3, choices=GROUPES_SANGUINS_CHOICES)
 
     def __str__(self):
         return f"{self.nom} - {self.date}"
-class Inscription(models.Model):
-
-    CRENEAU_CHOICES = [
-        ('matin', 'Matin'),
-        ('apres_midi', 'Après-midi'),
-        ('soir', 'Soir'),
-    ]
+class Creneau(models.Model):
 
     campagne = models.ForeignKey(
         'Campagne',
+        on_delete=models.CASCADE,
+        related_name='creneaux'
+    )
+
+    heure_debut = models.TimeField()
+    heure_fin = models.TimeField()
+
+    capacite_max = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.heure_debut} - {self.heure_fin}"
+class Inscription(models.Model):
+
+    creneau = models.ForeignKey(
+        'Creneau',
         on_delete=models.CASCADE,
         related_name='inscriptions'
     )
@@ -176,17 +170,15 @@ class Inscription(models.Model):
         related_name='inscriptions'
     )
 
-    creneau_horaire = models.CharField(
-        max_length=20,
-        choices=CRENEAU_CHOICES
-    )
-
     date_inscription = models.DateTimeField(auto_now_add=True)
 
     present = models.BooleanField(default=False)
 
+    class Meta:
+        unique_together = ('creneau', 'donneur')
+
     def __str__(self):
-        return f"{self.donneur.user.username} - {self.campagne.nom}"
+        return f"{self.donneur.user.username} - {self.creneau}"
 class ReponseAppel(models.Model):
 
     STATUT_CHOICES = [

@@ -1,9 +1,10 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
+
 from .models import (
     Donneur, Hopital, DemandeUrgente, Don,
-    Campagne, Inscription, ReponseAppel
+    Campagne, Inscription, ReponseAppel, Creneau
 )
 
 
@@ -62,28 +63,26 @@ class DonForm(forms.ModelForm):
 class CampagneForm(forms.ModelForm):
     class Meta:
         model = Campagne
-        fields = ['nom', 'date', 'lieu', 'groupes_cibles', 'capacite_totale']
+        fields = ['nom', 'lieu', 'date', 'groupes_cibles']
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'nom': forms.TextInput(attrs={'class': 'form-control'}),
             'lieu': forms.TextInput(attrs={'class': 'form-control'}),
             'groupes_cibles': forms.TextInput(attrs={'class': 'form-control'}),
-            'capacite_totale': forms.NumberInput(attrs={'class': 'form-control'}),
         }
 
 
-# ---------- INSCRIPTION ----------
+# ---------- INSCRIPTION (CORRIGÉ) ----------
 class InscriptionForm(forms.ModelForm):
     class Meta:
         model = Inscription
-        fields = ['campagne', 'creneau_horaire']
+        fields = ['creneau']   # ✔ SEULEMENT CE CHAMP
         widgets = {
-            'campagne': forms.Select(attrs={'class': 'form-select'}),
-            'creneau_horaire': forms.TextInput(attrs={'class': 'form-control'}),
+            'creneau': forms.Select(attrs={'class': 'form-select'}),
         }
 
 
-# ---------- RÉPONSE À UN APPEL ----------
+# ---------- RÉPONSE APPEL ----------
 class ReponseAppelForm(forms.ModelForm):
     class Meta:
         model = ReponseAppel
@@ -93,7 +92,7 @@ class ReponseAppelForm(forms.ModelForm):
         }
 
 
-# ---------- INSCRIPTION UTILISATEUR ----------
+# ---------- USER ----------
 class UserRegistrationForm(UserCreationForm):
     email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}))
 
@@ -104,5 +103,4 @@ class UserRegistrationForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
-            if not field.widget.attrs.get('class'):
-                field.widget.attrs['class'] = 'form-control'
+            field.widget.attrs['class'] = 'form-control'

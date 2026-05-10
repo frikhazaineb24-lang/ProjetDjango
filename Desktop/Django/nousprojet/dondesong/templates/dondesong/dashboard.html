@@ -1,0 +1,43 @@
+{% extends 'dondesong/base.html' %}
+
+{% block title %}Dashboard Donneur{% endblock %}
+
+{% block content %}
+
+<h2 class="text-center">Dashboard Donneur</h2>
+
+<p>Bienvenue {{ request.user.username }}</p>
+
+<hr>
+
+<!-- 📅 Prochaine date -->
+<h4>Prochaine date de don</h4>
+<p>{{ prochaine_date }}</p>
+
+<hr>
+
+<!-- 🩸 Historique des dons -->
+<h4>Historique des dons</h4>
+
+<ul>
+    {% for d in dons %}
+        <li>{{ d.date_don }} - {{ d.hopital.nom }}</li>
+    {% empty %}
+        <li>Aucun don</li>
+    {% endfor %}
+</ul>
+
+<hr>
+
+<!-- 🚨 Demandes urgentes -->
+<h4>Demandes urgentes</h4>
+
+<ul>
+    {% for demande in demandes %}
+        <li>{{ demande.groupe_sanguin }} - {{ demande.statut }}</li>
+    {% empty %}
+        <li>Aucune demande urgente</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}
