@@ -1,0 +1,442 @@
+{% extends 'dondesong/base.html' %}
+{% block title %}Mes inscriptions — DonDeSong{% endblock %}
+
+{% block extra_style %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    @keyframes pulseGreen {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+        50% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+    }
+    
+    .inscriptions-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        animation: fadeInUp 0.5s ease-out;
+    }
+    
+    /* Header */
+    .header-premium {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 28px;
+        padding: 35px;
+        margin-bottom: 35px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    
+    .header-premium::before {
+        content: '';
+        position: absolute;
+        top: -30%;
+        right: -30%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+    }
+    
+    .header-title h2 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        position: relative;
+    }
+    
+    .header-title p {
+        opacity: 0.9;
+        margin: 0;
+        position: relative;
+        font-size: 14px;
+    }
+    
+    .btn-dashboard {
+        background: rgba(255,255,255,0.2);
+        backdrop-filter: blur(10px);
+        padding: 12px 25px;
+        border-radius: 50px;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        position: relative;
+    }
+    
+    .btn-dashboard:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    /* Stats */
+    .stats-row {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 35px;
+        flex-wrap: wrap;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 20px;
+        padding: 20px 30px;
+        flex: 1;
+        min-width: 150px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(102, 126, 234, 0.15);
+    }
+    
+    .stat-number {
+        font-size: 36px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+    
+    .stat-label {
+        color: #6b7280;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+    
+    /* Sections */
+    .inscriptions-section {
+        background: white;
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        margin-bottom: 30px;
+    }
+    
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .section-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .section-title i {
+        color: #667eea;
+        font-size: 24px;
+    }
+    
+    .btn-campagnes {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        padding: 10px 25px;
+        border-radius: 50px;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .btn-campagnes:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        color: white;
+    }
+    
+    /* Grille inscriptions */
+    .inscriptions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 25px;
+    }
+    
+    .inscription-card {
+        background: #f9fafb;
+        border-radius: 20px;
+        padding: 0;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .inscription-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        border-color: #667eea;
+    }
+    
+    .card-header {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        padding: 18px 20px;
+        color: white;
+    }
+    
+    .card-header h3 {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .card-body {
+        padding: 20px;
+    }
+    
+    .info-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+        color: #374151;
+        font-size: 14px;
+    }
+    
+    .info-row i {
+        width: 20px;
+        color: #667eea;
+    }
+    
+    .creneau-badge {
+        background: #eef2ff;
+        padding: 6px 12px;
+        border-radius: 30px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #667eea;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 10px;
+    }
+    
+    .status-badge {
+        background: #d1fae5;
+        color: #10b981;
+        padding: 4px 12px;
+        border-radius: 30px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .btn-annuler {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 40px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.3s ease;
+        margin-top: 15px;
+        width: 100%;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-annuler:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+    }
+    
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #9ca3af;
+    }
+    
+    .empty-state i {
+        font-size: 70px;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+    
+    .empty-state h3 {
+        font-size: 20px;
+        color: #374151;
+        margin-bottom: 10px;
+    }
+    
+    .empty-state p {
+        margin-bottom: 20px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .inscriptions-container {
+            padding: 25px 15px;
+        }
+        
+        .header-premium {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .inscriptions-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .section-header {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="inscriptions-container">
+    
+    <!-- Header premium -->
+    <div class="header-premium">
+        <div class="header-title">
+            <h2><i class="fas fa-clipboard-list"></i> Mes inscriptions aux campagnes</h2>
+            <p>Retrouvez toutes vos inscriptions aux collectes de sang</p>
+        </div>
+        <a href="{% url 'dashboard_donneur' %}" class="btn-dashboard">
+            <i class="fas fa-arrow-left"></i> Mon tableau de bord
+        </a>
+    </div>
+    
+    <!-- Statistiques -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-number">{{ inscriptions|length }}</div>
+            <div class="stat-label">Inscriptions totales</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Inscriptions à venir</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Inscriptions passées</div>
+        </div>
+    </div>
+    
+    <!-- Section inscriptions -->
+    <div class="inscriptions-section">
+        <div class="section-header">
+            <div class="section-title">
+                <i class="fas fa-calendar-check"></i>
+                <span>Mes inscriptions</span>
+            </div>
+            <a href="{% url 'liste_campagnes' %}" class="btn-campagnes">
+                <i class="fas fa-plus-circle"></i> Voir les campagnes disponibles
+            </a>
+        </div>
+        
+        {% if inscriptions %}
+            <div class="inscriptions-grid">
+                {% for inscription in inscriptions %}
+                <div class="inscription-card">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-hand-holding-heart"></i>
+                            {{ inscription.campagne.nom }}
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-row">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span><strong>Date :</strong> {{ inscription.campagne.date|date:"d/m/Y" }}</span>
+                        </div>
+                        <div class="info-row">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span><strong>Lieu :</strong> {{ inscription.campagne.lieu }}</span>
+                        </div>
+                        <div class="info-row">
+                            <i class="fas fa-hospital"></i>
+                            <span><strong>Hôpital :</strong> {{ inscription.campagne.hopital.nom }}</span>
+                        </div>
+                        {% if inscription.creneau %}
+                        <div class="creneau-badge">
+                            <i class="fas fa-clock"></i> Créneau : {{ inscription.creneau.heure_debut|time:"H:i" }} - {{ inscription.creneau.heure_fin|time:"H:i" }}
+                        </div>
+                        {% endif %}
+                        <div class="info-row" style="margin-top: 12px;">
+                            <div class="status-badge">
+                                <i class="fas fa-check-circle"></i> Inscrit(e)
+                            </div>
+                        </div>
+                        
+                        <form action="{% url 'annuler_inscription' inscription.id %}" method="post" onsubmit="return confirm('Annuler votre inscription à cette campagne ?')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-annuler">
+                                <i class="fas fa-times-circle"></i> Annuler mon inscription
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-calendar-times"></i>
+                <h3>Aucune inscription</h3>
+                <p>Vous n'êtes inscrit(e) à aucune campagne pour le moment.</p>
+                <a href="{% url 'liste_campagnes' %}" class="btn-campagnes" style="display: inline-flex;">
+                    <i class="fas fa-calendar-plus"></i> Découvrir les campagnes
+                </a>
+            </div>
+        {% endif %}
+    </div>
+    
+</div>
+{% endblock %}

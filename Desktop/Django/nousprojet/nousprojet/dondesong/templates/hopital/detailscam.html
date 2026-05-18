@@ -1,0 +1,59 @@
+{% extends 'dondesong/base.html' %}
+
+{% block content %}
+<div style="max-width:900px; margin:0 auto; padding:20px;">
+    <h2 style="color:#c0392b;">📋 {{ campagne.nom }}</h2>
+    
+    <div style="background:#f8f9fa; padding:15px; border-radius:8px; margin-bottom:20px;">
+        <p><strong>📅 Date :</strong> {{ campagne.date }}</p>
+        <p><strong>📍 Lieu :</strong> {{ campagne.lieu }}</p>
+        <p><strong>🏥 Hôpital :</strong> {{ campagne.hopital.nom }}</p>
+        <p><strong>👥 Capacité totale :</strong> {{ total_inscrits }}/{{ campagne.capacite_totale }} inscrits</p>
+    </div>
+    
+    <h3>📊 Inscriptions par créneau :</h3>
+    <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:25px;">
+        {% for creneau, count in inscriptions_par_creneau.items %}
+        <div style="background:#e8f4f8; padding:10px; border-radius:8px; min-width:150px;">
+            <strong>{{ creneau.heure_debut|time:"H:i" }} - {{ creneau.heure_fin|time:"H:i" }}</strong>
+            <br>Inscrits : {{ count }}/{{ creneau.capacite }}
+        </div>
+        {% endfor %}
+    </div>
+    
+    <h3>📝 Liste des donneurs inscrits :</h3>
+    
+    {% if inscriptions %}
+    <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr style="background:#c0392b; color:white;">
+                <th style="padding:10px;">Nom</th>
+                <th style="padding:10px;">Prénom</th>
+                <th style="padding:10px;">Groupe sanguin</th>
+                <th style="padding:10px;">Téléphone</th>
+                <th style="padding:10px;">Créneau</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inscription in inscriptions %}
+            <tr style="border-bottom:1px solid #ddd;">
+                <td style="padding:10px;">{{ inscription.donneur.user.last_name }}</td>
+                <td style="padding:10px;">{{ inscription.donneur.user.first_name }}</td>
+                <td style="padding:10px;">{{ inscription.donneur.groupe_sanguin }}</td>
+                <td style="padding:10px;">{{ inscription.donneur.telephone }}</td>
+                <td style="padding:10px;">{{ inscription.creneau.heure_debut|time:"H:i" }} - {{ inscription.creneau.heure_fin|time:"H:i" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="background:#fff3cd; padding:15px; border-radius:8px; text-align:center;">
+        ⚠️ Aucun donneur inscrit pour cette campagne.
+    </div>
+    {% endif %}
+    
+    <div style="margin-top:20px;">
+        <a href="{% url 'dashboard_hopital' %}" style="color:#c0392b; text-decoration:none;">← Retour au tableau de bord</a>
+    </div>
+</div>
+{% endblock %}

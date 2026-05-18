@@ -1,0 +1,73 @@
+{% extends 'dondesong/base.html' %}
+{% block title %}S'inscrire à {{ campagne.nom }} — DonDeSong{% endblock %}
+
+{% block content %}
+<div style="max-width:600px; margin:0 auto; padding:30px 20px;">
+
+  <a href="{% url 'liste_campagnes' %}" style="color:#c0392b; text-decoration:none;">← Retour aux campagnes</a>
+
+  <div class="card" style="margin-top:20px;">
+    <h2 style="color:#c0392b; margin-top:0;">🩸 S'inscrire à une campagne</h2>
+
+    <div style="background:#fff0f0; border-left:4px solid #c0392b; padding:15px; border-radius:6px; margin-bottom:20px;">
+      <p style="margin:0;"><strong>📋 Campagne :</strong> {{ campagne.nom }}</p>
+      <p style="margin:5px 0 0;"><strong>📅 Date :</strong> {{ campagne.date }}</p>
+      <p style="margin:5px 0 0;"><strong>📍 Lieu :</strong> {{ campagne.lieu }}</p>
+      <p style="margin:5px 0 0;"><strong>🏥 Hôpital :</strong> {{ campagne.hopital.nom }}</p>
+    </div>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" style="margin-bottom:15px;">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    {% if not eligible %}
+      <div class="alert alert-warning">
+        ⚠️ Vous n'êtes pas encore éligible au don. Prochaine date possible : <strong>{{ prochaine_date }}</strong>.
+        <br>Vous ne pouvez pas vous inscrire à cette campagne.
+      </div>
+      <a href="{% url 'liste_campagnes' %}" class="btn" style="background:#666;">Retour aux campagnes</a>
+
+    {% elif creneaux %}
+      <form method="post">
+        {% csrf_token %}
+
+        <div style="margin-bottom:20px;">
+          <label style="display:block; margin-bottom:8px; font-weight:bold;">⏰ Choisissez votre créneau horaire</label>
+
+          {% for creneau in creneaux %}
+            <label style="display:flex; align-items:center; gap:10px; padding:12px; border:2px solid #eee; border-radius:8px; margin-bottom:10px; cursor:pointer; transition:0.2s;"
+                   onmouseover="this.style.borderColor='#c0392b'" onmouseout="this.style.borderColor='#eee'">
+              <input type="radio" name="creneau" value="{{ creneau.id }}" required>
+              <span>
+                <strong>{{ creneau.heure_debut }} – {{ creneau.heure_fin }}</strong>
+                <span style="color:#888; font-size:0.9em; margin-left:10px;">
+                  ({{ creneau.inscription_set.count }}/{{ creneau.capacite }} inscrits)
+                </span>
+                {% if creneau.inscription_set.count >= creneau.capacite %}
+                  <span style="color:red; font-size:0.85em; margin-left:5px;">— Complet</span>
+                {% else %}
+                  <span style="color:green; font-size:0.85em; margin-left:5px;">— Disponible</span>
+                {% endif %}
+              </span>
+            </label>
+          {% endfor %}
+        </div>
+
+        <div style="display:flex; gap:10px;">
+          <button type="submit" class="btn" style="flex:1;">✅ Confirmer l'inscription</button>
+          <a href="{% url 'liste_campagnes' %}" class="btn" style="background:#666; flex:1; text-align:center;">Annuler</a>
+        </div>
+      </form>
+
+    {% else %}
+      <div class="alert" style="background:#fff3cd; border:1px solid #ffc107; color:#856404; padding:15px; border-radius:8px;">
+        ⚠️ Aucun créneau disponible pour cette campagne.
+      </div>
+      <a href="{% url 'liste_campagnes' %}" class="btn" style="background:#666;">Retour</a>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

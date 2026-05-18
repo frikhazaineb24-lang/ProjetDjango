@@ -1,0 +1,54 @@
+{% extends 'dondesong/base.html' %}
+{% block title %}Nouvelle Demande — DonDeSong{% endblock %}
+
+{% block content %}
+
+<div style="max-width:550px; margin:0 auto;">
+
+  <div style="display:flex; align-items:center; gap:15px; margin-bottom:25px;">
+    <a href="{% url 'dashboard_hopital' %}" style="color:#c0392b; text-decoration:none; font-size:20px;">←</a>
+    <h2 style="margin:0; color:#c0392b;">🚨 Nouvelle demande urgente</h2>
+  </div>
+
+  <div class="card">
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label>Groupe sanguin recherché</label>
+        <select name="groupe" class="form-control" required>
+          <option value="">-- Choisir --</option>
+          {% for g in groupes %}
+            <option value="{{ g }}">{{ g }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Quantité (unités)</label>
+        <input type="number" name="quantite" class="form-control" min="1" required>
+      </div>
+
+      <div class="form-group">
+        <label>Date limite</label>
+        <input type="date" name="delai" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea name="description" class="form-control" rows="4"
+          placeholder="Précisez le contexte, l'urgence, les instructions..." required
+          style="resize:vertical;"></textarea>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:20px;">
+        <button type="submit" class="btn btn-block">📢 Publier la demande</button>
+        <a href="{% url 'dashboard_hopital' %}" class="btn btn-block" style="background:#95a5a6;">Annuler</a>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+
+{% endblock %}

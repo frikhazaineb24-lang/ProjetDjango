@@ -1,0 +1,358 @@
+{% extends 'dondesong/base.html' %}
+
+{% block title %}Modifier mon profil - DonDeSong{% endblock %}
+
+{% block extra_style %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes shimmer {
+        0% {
+            background-position: -1000px 0;
+        }
+        100% {
+            background-position: 1000px 0;
+        }
+    }
+    
+    @keyframes pulseBorder {
+        0%, 100% { border-color: #667eea; }
+        50% { border-color: #764ba2; }
+    }
+    
+    .profil-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    /* Carte principale */
+    .card-profil {
+        background: white;
+        border-radius: 32px;
+        overflow: hidden;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card-profil:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* En-tête avec avatar */
+    .header-profil {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 40px;
+        text-align: center;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .header-profil::before {
+        content: '';
+        position: absolute;
+        top: -30%;
+        right: -30%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+        animation: shimmer 8s ease-in-out infinite;
+    }
+    
+    .avatar {
+        width: 100px;
+        height: 100px;
+        background: rgba(255,255,255,0.2);
+        backdrop-filter: blur(10px);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        border: 3px solid rgba(255,255,255,0.5);
+    }
+    
+    .avatar i {
+        font-size: 50px;
+        color: white;
+    }
+    
+    .header-profil h2 {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    
+    .header-profil p {
+        opacity: 0.9;
+        margin: 0;
+    }
+    
+    /* Corps du formulaire */
+    .body-profil {
+        padding: 35px;
+    }
+    
+    /* Champs de formulaire modernes */
+    .input-group-premium {
+        margin-bottom: 25px;
+        position: relative;
+    }
+    
+    .input-group-premium label {
+        display: block;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+    
+    .input-group-premium label i {
+        color: #667eea;
+        margin-right: 8px;
+    }
+    
+    .input-premium {
+        width: 100%;
+        padding: 14px 18px;
+        border: 2px solid #e5e7eb;
+        border-radius: 16px;
+        font-size: 15px;
+        transition: all 0.3s ease;
+        background: #f9fafb;
+    }
+    
+    .input-premium:focus {
+        outline: none;
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    /* Carte d'informations */
+    .info-card {
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        border-radius: 20px;
+        padding: 20px;
+        margin: 25px 0;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .info-card i {
+        font-size: 35px;
+        color: #d97706;
+    }
+    
+    .info-card-content h4 {
+        margin: 0 0 5px;
+        color: #92400e;
+    }
+    
+    .info-card-content p {
+        margin: 0;
+        color: #78350f;
+        font-size: 13px;
+    }
+    
+    /* Boutons */
+    .btn-save {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 14px 30px;
+        border: none;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    .btn-save:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+    }
+    
+    /* Section désactivation */
+    .danger-zone {
+        margin-top: 30px;
+        padding-top: 25px;
+        border-top: 1px solid #fee2e2;
+    }
+    
+    .danger-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #dc2626;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+    
+    .btn-danger {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 50px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+    }
+    
+    /* Message de confirmation */
+    .alert-premium {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 16px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    /* Groupe sanguin badge */
+    .blood-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 18px;
+        margin-top: 15px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 640px) {
+        .body-profil {
+            padding: 25px;
+        }
+        
+        .info-card {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profil-container">
+    
+    <div class="card-profil">
+        
+        <!-- En-tête avec avatar -->
+        <div class="header-profil">
+            <div class="avatar">
+                <i class="fas fa-user-md"></i>
+            </div>
+            <h2>{{ donneur.user.get_full_name|default:donneur.user.username }}</h2>
+            <div class="blood-badge">
+                <i class="fas fa-tint"></i> Groupe {{ donneur.groupe_sanguin }}
+            </div>
+            <p>{{ donneur.user.email }}</p>
+        </div>
+        
+        <!-- Corps du formulaire -->
+        <div class="body-profil">
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert-premium">
+                        <i class="fas fa-check-circle fa-lg"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <form method="POST">
+                {% csrf_token %}
+                
+                <!-- Ville -->
+                <div class="input-group-premium">
+                    <label>
+                        <i class="fas fa-map-marker-alt"></i> Ville
+                    </label>
+                    <input type="text" name="ville" class="input-premium" 
+                           value="{{ donneur.ville }}" placeholder="Votre ville">
+                </div>
+                
+                <!-- Téléphone -->
+                <div class="input-group-premium">
+                    <label>
+                        <i class="fas fa-phone-alt"></i> Téléphone
+                    </label>
+                    <input type="tel" name="telephone" class="input-premium" 
+                           value="{{ donneur.telephone }}" placeholder="Votre numéro de téléphone">
+                </div>
+                
+                <!-- Carte d'information éligibilité -->
+                {% if donneur.est_eligible %}
+                <div class="info-card">
+                    <i class="fas fa-heartbeat"></i>
+                    <div class="info-card-content">
+                        <h4>✅ Vous êtes éligible au don</h4>
+                        <p>Vous pouvez donner votre sang dès maintenant.</p>
+                    </div>
+                </div>
+                {% else %}
+                <div class="info-card" style="background: linear-gradient(135deg, #fee2e2, #fecaca);">
+                    <i class="fas fa-clock"></i>
+                    <div class="info-card-content">
+                        <h4 style="color: #991b1b;">⏳ Prochaine date de don</h4>
+                        <p style="color: #7f1d1d;">{{ donneur.date_prochain_don }}</p>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Bouton Enregistrer -->
+                <button type="submit" class="btn-save">
+                    <i class="fas fa-save"></i> Enregistrer les modifications
+                </button>
+            </form>
+            
+            
+            
+        </div>
+        
+    </div>
+    
+    <!-- Lien retour -->
+    <div style="text-align: center; margin-top: 25px;">
+        <a href="{% url 'dashboard_donneur' %}" style="color: rgba(255,255,255,0.8); text-decoration: none;">
+            <i class="fas fa-arrow-left"></i> Retour au dashboard
+        </a>
+    </div>
+    
+</div>
+{% endblock %}

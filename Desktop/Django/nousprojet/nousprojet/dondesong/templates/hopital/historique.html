@@ -1,0 +1,589 @@
+{% extends 'dondesong/base.html' %}
+{% block title %}DonDeSong - Historique des demandes{% endblock %}
+
+{% block extra_style %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    @keyframes glow {
+        0%, 100% { box-shadow: 0 0 5px rgba(102, 126, 234, 0.2); }
+        50% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.4); }
+    }
+    
+    .historique-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 30px 20px;
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    /* En-tête premium */
+    .header-historique {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 28px;
+        padding: 35px;
+        margin-bottom: 35px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .header-historique::before {
+        content: '';
+        position: absolute;
+        top: -30%;
+        right: -30%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+        animation: pulse 10s ease-in-out infinite;
+    }
+    
+    .header-historique h1 {
+        font-size: 32px;
+        font-weight: 800;
+        margin-bottom: 10px;
+        position: relative;
+    }
+    
+    .header-historique p {
+        opacity: 0.9;
+        margin: 0;
+        position: relative;
+        font-size: 16px;
+    }
+    
+    .stats-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255,255,255,0.2);
+        backdrop-filter: blur(10px);
+        border-radius: 50px;
+        padding: 8px 20px;
+        margin-top: 20px;
+        font-size: 14px;
+    }
+    
+    /* Filtres */
+    .filters-section {
+        background: white;
+        border-radius: 20px;
+        padding: 20px;
+        margin-bottom: 30px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .filter-group {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+        padding: 8px 20px;
+        border-radius: 50px;
+        border: none;
+        background: #f3f4f6;
+        color: #4b5563;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .filter-btn.active {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+    
+    .filter-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+    }
+    
+    .search-box {
+        display: flex;
+        align-items: center;
+        background: #f3f4f6;
+        border-radius: 50px;
+        padding: 5px 15px;
+    }
+    
+    .search-box input {
+        border: none;
+        background: transparent;
+        padding: 8px;
+        width: 200px;
+        outline: none;
+    }
+    
+    .search-box button {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        color: #667eea;
+    }
+    
+    /* Cartes demande */
+    .timeline {
+        position: relative;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 30px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(180deg, #667eea, #764ba2, #667eea);
+    }
+    
+    .demande-timeline-item {
+        position: relative;
+        margin-bottom: 25px;
+        animation: slideInLeft 0.5s ease-out;
+        animation-fill-mode: both;
+    }
+    
+    .demande-timeline-item:nth-child(1) { animation-delay: 0.1s; }
+    .demande-timeline-item:nth-child(2) { animation-delay: 0.2s; }
+    .demande-timeline-item:nth-child(3) { animation-delay: 0.3s; }
+    .demande-timeline-item:nth-child(4) { animation-delay: 0.4s; }
+    .demande-timeline-item:nth-child(5) { animation-delay: 0.5s; }
+    
+    .timeline-icon {
+        position: absolute;
+        left: 18px;
+        top: 20px;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: white;
+        border: 3px solid;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .timeline-icon.active {
+        border-color: #10b981;
+        background: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+    }
+    
+    .timeline-icon.closed {
+        border-color: #9ca3af;
+        background: #9ca3af;
+    }
+    
+    .timeline-icon i {
+        font-size: 12px;
+        color: white;
+    }
+    
+    .demande-card-historique {
+        background: white;
+        border-radius: 20px;
+        padding: 20px 20px 20px 70px;
+        margin-left: 30px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .demande-card-historique::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 5px;
+        height: 100%;
+        transition: width 0.3s ease;
+    }
+    
+    .demande-card-historique.active::before {
+        background: linear-gradient(180deg, #10b981, #059669);
+    }
+    
+    .demande-card-historique.closed::before {
+        background: #9ca3af;
+    }
+    
+    .demande-card-historique:hover {
+        transform: translateX(8px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .demande-card-historique.active:hover::before {
+        width: 8px;
+    }
+    
+    .demande-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .groupe-badge-large {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 18px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .quantite-badge {
+        background: #f3f4f6;
+        padding: 6px 15px;
+        border-radius: 50px;
+        font-weight: 600;
+        color: #374151;
+    }
+    
+    .statut-badge-large {
+        padding: 6px 18px;
+        border-radius: 50px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+    
+    .statut-active-large {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+    }
+    
+    .statut-closed-large {
+        background: #9ca3af;
+        color: white;
+    }
+    
+    .demande-description {
+        background: #f9fafb;
+        border-radius: 12px;
+        padding: 15px;
+        margin: 15px 0;
+        border-left: 3px solid #667eea;
+    }
+    
+    .demande-description p {
+        margin: 0;
+        color: #4b5563;
+        line-height: 1.5;
+    }
+    
+    .demande-footer {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-top: 15px;
+    }
+    
+    .demande-date {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #6b7280;
+        font-size: 13px;
+    }
+    
+    .reponse-count {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #eef2ff;
+        padding: 5px 12px;
+        border-radius: 50px;
+        font-size: 13px;
+        color: #667eea;
+    }
+    
+    .btn-view-details {
+        background: transparent;
+        border: 2px solid #667eea;
+        color: #667eea;
+        padding: 8px 20px;
+        border-radius: 30px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .btn-view-details:hover {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-color: transparent;
+        transform: translateY(-2px);
+    }
+    
+    /* Empty state */
+    .empty-state-premium {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 24px;
+    }
+    
+    .empty-state-premium i {
+        font-size: 70px;
+        color: #e5e7eb;
+        margin-bottom: 20px;
+    }
+    
+    .empty-state-premium h3 {
+        color: #374151;
+        margin-bottom: 10px;
+    }
+    
+    .empty-state-premium p {
+        color: #9ca3af;
+    }
+    
+    /* Pagination */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 30px;
+    }
+    
+    .page-link {
+        padding: 10px 16px;
+        background: white;
+        border-radius: 12px;
+        text-decoration: none;
+        color: #667eea;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    
+    .page-link:hover, .page-link.active {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+    
+    /* Animation pulse */
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .demande-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .filters-section {
+            flex-direction: column;
+        }
+        
+        .timeline::before {
+            left: 20px;
+        }
+        
+        .timeline-icon {
+            left: 8px;
+        }
+        
+        .demande-card-historique {
+            padding: 15px 15px 15px 55px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="historique-container">
+    
+    <!-- En-tête -->
+    <div class="header-historique">
+        <h1>
+            <i class="fas fa-history"></i> 
+            Historique des demandes
+        </h1>
+        <p>Consultez l'historique complet de toutes vos demandes de sang</p>
+        <div class="stats-badge">
+            <i class="fas fa-chart-line"></i>
+            <span>{{ demandes|length }} demande(s) au total</span>
+        </div>
+    </div>
+    
+    <!-- Filtres -->
+    <div class="filters-section">
+        <div class="filter-group">
+            <button class="filter-btn active" onclick="filterDemandes('all')">
+                <i class="fas fa-list"></i> Toutes
+            </button>
+            <button class="filter-btn" onclick="filterDemandes('active')">
+                <i class="fas fa-bell"></i> Actives
+            </button>
+            <button class="filter-btn" onclick="filterDemandes('cloture')">
+                <i class="fas fa-check-circle"></i> Clôturées
+            </button>
+        </div>
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Rechercher..." onkeyup="searchDemandes()">
+            <button onclick="searchDemandes()">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Timeline des demandes -->
+    <div class="timeline">
+        {% if demandes %}
+            {% for demande in demandes %}
+            <div class="demande-timeline-item demande-item" 
+                 data-statut="{{ demande.statut }}"
+                 data-groupe="{{ demande.groupe_sanguin }}"
+                 data-description="{{ demande.description|lower }}">
+                
+                <div class="timeline-icon {% if demande.statut == 'active' %}active{% else %}closed{% endif %}">
+                    {% if demande.statut == 'active' %}
+                        <i class="fas fa-bell"></i>
+                    {% else %}
+                        <i class="fas fa-check"></i>
+                    {% endif %}
+                </div>
+                
+                <div class="demande-card-historique {% if demande.statut == 'active' %}active{% else %}closed{% endif %}">
+                    
+                    <div class="demande-header">
+                        <div>
+                            <span class="groupe-badge-large">
+                                <i class="fas fa-tint"></i> {{ demande.groupe_sanguin }}
+                            </span>
+                            <span class="quantite-badge">
+                                <i class="fas fa-chart-simple"></i> {{ demande.quantite }} poche(s)
+                            </span>
+                        </div>
+                        <span class="statut-badge-large {% if demande.statut == 'active' %}statut-active-large{% else %}statut-closed-large{% endif %}">
+                            {% if demande.statut == 'active' %}
+                                <i class="fas fa-circle"></i> En cours
+                            {% else %}
+                                <i class="fas fa-check-circle"></i> Clôturée
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    <div class="demande-description">
+                        <p>
+                            <i class="fas fa-quote-left" style="color: #667eea; margin-right: 8px;"></i>
+                            {{ demande.description|default:"Aucune description fournie" }}
+                        </p>
+                    </div>
+                    
+                    <div class="demande-footer">
+                        <div class="demande-date">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Date limite : <strong>{{ demande.delai|date:"d/m/Y" }}</strong></span>
+                        </div>
+                        <div class="reponse-count">
+                            <i class="fas fa-reply-all"></i>
+                            <span>{{ demande.reponseappel_set.count }} réponse(s)</span>
+                        </div>
+                        <a href="{% url 'voir_reponses' demande.id %}" class="btn-view-details">
+                            <i class="fas fa-eye"></i> Voir les réponses
+                        </a>
+                    </div>
+                    
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state-premium">
+                <i class="fas fa-inbox"></i>
+                <h3>Aucune demande d'historique</h3>
+                <p>Vous n'avez pas encore créé de demande de sang.</p>
+                <a href="{% url 'ajouter_demande' %}" class="btn-action" style="display: inline-flex; margin-top: 20px;">
+                    <i class="fas fa-plus-circle"></i> Créer ma première demande
+                </a>
+            </div>
+        {% endif %}
+    </div>
+    
+</div>
+
+<script>
+    // Filtrer les demandes par statut
+    function filterDemandes(statut) {
+        const items = document.querySelectorAll('.demande-item');
+        const buttons = document.querySelectorAll('.filter-btn');
+        
+        buttons.forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        items.forEach(item => {
+            if (statut === 'all') {
+                item.style.display = 'block';
+            } else {
+                const itemStatut = item.getAttribute('data-statut');
+                if (itemStatut === statut) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            }
+        });
+    }
+    
+    // Rechercher dans les demandes
+    function searchDemandes() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const items = document.querySelectorAll('.demande-item');
+        
+        items.forEach(item => {
+            const groupe = item.getAttribute('data-groupe').toLowerCase();
+            const description = item.getAttribute('data-description');
+            
+            if (groupe.includes(searchTerm) || description.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+</script>
+{% endblock %}

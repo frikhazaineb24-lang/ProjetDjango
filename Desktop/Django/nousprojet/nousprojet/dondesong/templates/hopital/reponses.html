@@ -1,0 +1,16 @@
+{% extends 'dondesong/base.html' %}
+
+{% block content %}
+<h2>Réponses des donneurs</h2>
+
+{% for r in reponses %}
+    <div class="card">
+        <p>Donneur : {{ r.donneur.user.username }}</p>
+        <p>Date : {{ r.date_reponse }}</p>
+        <p>Statut : {{ r.statut }}</p>
+    </div>
+{% empty %}
+    <p>Aucune réponse</p>
+{% endfor %}
+
+{% endblock %}

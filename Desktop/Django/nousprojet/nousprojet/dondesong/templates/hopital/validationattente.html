@@ -1,0 +1,438 @@
+{% extends 'dondesong/base.html' %}
+
+{% block title %}DonDeSong - Validation en cours{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* Animation de fond */
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+    
+    .container {
+        padding: 40px 20px;
+    }
+    
+    /* Carte principale */
+    .card-validation {
+        background: white;
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        text-align: center;
+        max-width: 600px;
+        margin: 0 auto;
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Anneau de progression */
+    .progress-ring {
+        width: 150px;
+        height: 150px;
+        position: relative;
+        margin: 0 auto 20px;
+    }
+    
+    .progress-ring svg {
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg);
+    }
+    
+    .progress-ring circle {
+        fill: none;
+        stroke-width: 8;
+        stroke-linecap: round;
+    }
+    
+    .progress-ring .bg {
+        stroke: #e5e7eb;
+    }
+    
+    .progress-ring .progress {
+        stroke: url(#gradient);
+        stroke-dasharray: 440;
+        stroke-dashoffset: 440;
+        animation: drawProgress 2s ease-out forwards;
+    }
+    
+    @keyframes drawProgress {
+        0% { stroke-dashoffset: 440; }
+        100% { stroke-dashoffset: 110; }
+    }
+    
+    /* Icône centrale */
+    .icon-pulse {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: pulse 2s infinite;
+    }
+    
+    .icon-pulse i {
+        font-size: 28px;
+        color: white;
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            transform: translate(-50%, -50%) scale(1);
+            box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+        }
+        50% {
+            transform: translate(-50%, -50%) scale(1.05);
+            box-shadow: 0 0 0 15px rgba(102, 126, 234, 0);
+        }
+    }
+    
+    /* Timeline */
+    .timeline {
+        text-align: left;
+        margin: 30px 0;
+    }
+    
+    .timeline-step {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        opacity: 0;
+        animation: slideIn 0.5s ease-out forwards;
+    }
+    
+    .timeline-step:nth-child(1) { animation-delay: 0.2s; }
+    .timeline-step:nth-child(2) { animation-delay: 0.4s; }
+    .timeline-step:nth-child(3) { animation-delay: 0.6s; }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    .timeline-icon {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: #f3f4f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+    }
+    
+    .timeline-step.completed .timeline-icon {
+        background: #10b981;
+    }
+    
+    .timeline-step.completed .timeline-icon i {
+        color: white;
+    }
+    
+    .timeline-step.current .timeline-icon {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        animation: stepPulse 1.5s infinite;
+    }
+    
+    .timeline-step.current .timeline-icon i {
+        color: white;
+    }
+    
+    .timeline-step.pending .timeline-icon {
+        background: #e5e7eb;
+    }
+    
+    .timeline-step.pending .timeline-icon i {
+        color: #9ca3af;
+    }
+    
+    @keyframes stepPulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4); }
+        50% { box-shadow: 0 0 0 10px rgba(102, 126, 234, 0); }
+    }
+    
+    .timeline-content {
+        flex: 1;
+    }
+    
+    .timeline-title {
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    
+    .timeline-desc {
+        font-size: 13px;
+        color: #6b7280;
+    }
+    
+    /* Badge estimation */
+    .estimation-badge {
+        background: #fef3c7;
+        border-radius: 20px;
+        padding: 8px 16px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        margin-top: 10px;
+    }
+    
+    .estimation-badge i {
+        color: #d97706;
+    }
+    
+    /* Compteur */
+    .counter {
+        font-size: 20px;
+        font-weight: 800;
+        color: #667eea;
+    }
+    
+    /* Cartes info */
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin: 25px 0;
+    }
+    
+    .info-card {
+        background: #f8f9fa;
+        border-radius: 16px;
+        padding: 15px;
+        text-align: center;
+    }
+    
+    .info-card i {
+        font-size: 28px;
+        color: #667eea;
+        margin-bottom: 8px;
+    }
+    
+    .info-card h6 {
+        margin: 0 0 5px;
+        font-weight: 700;
+    }
+    
+    .info-card small {
+        font-size: 11px;
+        color: #6c757d;
+    }
+    
+    /* Alert personnalisée */
+    .alert-custom {
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        border-radius: 16px;
+        padding: 15px;
+        margin: 20px 0;
+    }
+    
+    /* Boutons */
+    .btn-exceptional {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-exceptional:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        color: white;
+    }
+    
+    .btn-outline-exceptional {
+        background: transparent;
+        border: 2px solid #667eea;
+        color: #667eea;
+        padding: 10px 25px;
+        border-radius: 50px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-exceptional:hover {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-color: transparent;
+    }
+    
+    .btn-group-custom {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 25px;
+    }
+    
+    hr {
+        margin: 25px 0;
+        border: none;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #ddd, transparent);
+    }
+    
+    .text-gradient {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card-validation">
+    <!-- Anneau de progression -->
+    <div class="progress-ring">
+        <svg viewBox="0 0 160 160">
+            <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <circle class="bg" cx="80" cy="80" r="70" />
+            <circle class="progress" cx="80" cy="80" r="70" />
+        </svg>
+        <div class="icon-pulse">
+            <i class="fas fa-hospital-user"></i>
+        </div>
+    </div>
+
+    <h1 class="text-gradient" style="font-size: 28px; margin-bottom: 10px;">Validation en cours</h1>
+    <p style="color: #6b7280; margin-bottom: 30px;">Votre compte hôpital est en cours de vérification</p>
+
+    <!-- Timeline -->
+    <div class="timeline">
+        <div class="timeline-step completed">
+            <div class="timeline-icon">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div class="timeline-content">
+                <div class="timeline-title">Inscription complétée ✅</div>
+                <div class="timeline-desc">Vos informations ont été enregistrées avec succès</div>
+            </div>
+        </div>
+
+        <div class="timeline-step current">
+            <div class="timeline-icon">
+                <i class="fas fa-hourglass-half"></i>
+            </div>
+            <div class="timeline-content">
+                <div class="timeline-title">En attente de validation ⏳</div>
+                <div class="timeline-desc">Un administrateur examine votre dossier médical</div>
+                <div class="estimation-badge">
+                    <i class="fas fa-clock"></i>
+                    <span>Délai estimé : <span class="counter" id="counter">0</span> - 24 heures</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="timeline-step pending">
+            <div class="timeline-icon">
+                <i class="fas fa-check-double"></i>
+            </div>
+            <div class="timeline-content">
+                <div class="timeline-title">Validation finale</div>
+                <div class="timeline-desc">Accès à toutes les fonctionnalités de l'espace hôpital</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grille d'informations -->
+    <div class="info-grid">
+        <div class="info-card">
+            <i class="fas fa-shield-alt"></i>
+            <h6>Sécurité maximale</h6>
+            <small>Validation manuelle par notre équipe</small>
+        </div>
+        <div class="info-card">
+            <i class="fas fa-envelope"></i>
+            <h6>Notification</h6>
+            <small>Email dès la validation</small>
+        </div>
+    </div>
+
+    <!-- Message d'aide -->
+    <div class="alert-custom">
+        <i class="fas fa-headset" style="font-size: 24px; display: block; margin-bottom: 10px; color: #d97706;"></i>
+        <h6 style="margin: 0 0 8px;">Besoin d'aide ?</h6>
+        <p style="margin: 0; font-size: 13px; color: #92400e;">
+            Contactez notre support : 
+            <strong>+216 XX XXX XXX</strong> ou 
+            <strong>validation@DondeSang.com</strong>
+        </p>
+    </div>
+
+    <!-- Actions -->
+    <div class="btn-group-custom">
+        <a href="{% url 'deconnexion' %}" class="btn-exceptional">
+            <i class="fas fa-sign-out-alt"></i> Se déconnecter
+        </a>
+        <a href="{% url 'home' %}" class="btn-outline-exceptional">
+            <i class="fas fa-home"></i> Accueil
+        </a>
+    </div>
+
+    <hr>
+
+    <div style="text-align: center; font-size: 12px; color: #999;">
+        <i class="fas fa-heartbeat" style="color: #e74c3c;"></i>
+        DonDeSang - Donner du sang, sauver des vies
+    </div>
+</div>
+
+<script>
+    // Animation du compteur
+    function animateCounter() {
+        let counter = document.getElementById('counter');
+        if (counter) {
+            let current = 0;
+            let target = 12;
+            let interval = setInterval(() => {
+                if (current < target) {
+                    current++;
+                    counter.textContent = current;
+                } else {
+                    clearInterval(interval);
+                }
+            }, 80);
+        }
+    }
+    
+    // Lancer l'animation quand la page est chargée
+    document.addEventListener('DOMContentLoaded', animateCounter);
+</script>
+{% endblock %}

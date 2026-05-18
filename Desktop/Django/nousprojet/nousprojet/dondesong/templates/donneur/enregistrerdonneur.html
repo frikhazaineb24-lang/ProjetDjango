@@ -1,0 +1,335 @@
+{% extends 'dondesong/base.html' %}
+{% block title %}Enregistrer un don — DonDeSong{% endblock %}
+
+{% block extra_style %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+    }
+    
+    @keyframes heartbeat {
+        0%, 100% { transform: scale(1); }
+        25% { transform: scale(1.1); }
+        50% { transform: scale(1); }
+        75% { transform: scale(1.05); }
+    }
+    
+    .don-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+    }
+    
+    .don-card {
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 48px;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        padding: 45px;
+        width: 100%;
+        max-width: 600px;
+        transition: all 0.3s ease;
+        animation: fadeInUp 0.5s ease-out;
+    }
+    
+    .don-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.3);
+    }
+    
+    .don-header {
+        text-align: center;
+        margin-bottom: 35px;
+    }
+    
+    .don-icon {
+        width: 90px;
+        height: 90px;
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        animation: heartbeat 1.5s ease-in-out infinite;
+    }
+    
+    .don-icon i {
+        font-size: 45px;
+        color: white;
+    }
+    
+    .don-header h2 {
+        font-size: 32px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        margin-bottom: 8px;
+    }
+    
+    .don-header p {
+        color: #6b7280;
+        font-size: 14px;
+    }
+    
+    /* Champ select premium */
+    .input-group-premium {
+        margin-bottom: 30px;
+        position: relative;
+    }
+    
+    .input-group-premium .input-icon {
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        transition: all 0.3s ease;
+        z-index: 1;
+    }
+    
+    .input-group-premium select {
+        width: 100%;
+        padding: 16px 20px 16px 50px;
+        border: 2px solid #e5e7eb;
+        border-radius: 32px;
+        font-size: 15px;
+        transition: all 0.3s ease;
+        background: #f9fafb;
+        font-family: inherit;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 18px center;
+        background-size: 20px;
+    }
+    
+    .input-group-premium select:focus {
+        outline: none;
+        border-color: #ef4444;
+        background-color: white;
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+    }
+    
+    .input-group-premium select:focus + .input-icon {
+        color: #ef4444;
+    }
+    
+    /* Alerte information */
+    .info-alert {
+        background: linear-gradient(135deg, #dbeafe, #e0e7ff);
+        border-radius: 24px;
+        padding: 20px;
+        margin: 25px 0;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        border-left: 4px solid #3b82f6;
+    }
+    
+    .info-alert i {
+        font-size: 36px;
+        color: #3b82f6;
+    }
+    
+    .info-content h4 {
+        font-size: 15px;
+        font-weight: 700;
+        margin: 0 0 5px;
+        color: #1e40af;
+    }
+    
+    .info-content p {
+        font-size: 13px;
+        color: #1e3a8a;
+        margin: 0;
+    }
+    
+    /* Boutons */
+    .btn-group {
+        display: flex;
+        gap: 15px;
+        margin-top: 25px;
+    }
+    
+    .btn-enregistrer {
+        flex: 2;
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        border: none;
+        padding: 16px;
+        border-radius: 40px;
+        color: white;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    .btn-enregistrer::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .btn-enregistrer:hover::before {
+        left: 100%;
+    }
+    
+    .btn-enregistrer:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(239, 68, 68, 0.4);
+    }
+    
+    .btn-annuler {
+        flex: 1;
+        background: transparent;
+        border: 2px solid #9ca3af;
+        border-radius: 40px;
+        padding: 14px;
+        color: #6b7280;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .btn-annuler:hover {
+        background: #f3f4f6;
+        border-color: #6b7280;
+        transform: translateY(-2px);
+    }
+    
+    /* Message de motivation */
+    .motivation-message {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e5e7eb;
+    }
+    
+    .motivation-message i {
+        color: #ef4444;
+        font-size: 20px;
+        animation: heartbeat 1.5s ease-in-out infinite;
+        display: inline-block;
+    }
+    
+    .motivation-message p {
+        color: #6b7280;
+        font-size: 13px;
+        margin-top: 10px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 640px) {
+        .don-card {
+            padding: 30px 25px;
+            border-radius: 32px;
+        }
+        
+        .don-header h2 {
+            font-size: 26px;
+        }
+        
+        .btn-group {
+            flex-direction: column;
+        }
+        
+        .btn-enregistrer, .btn-annuler {
+            padding: 14px;
+        }
+        
+        .info-alert {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="don-container">
+    <div class="don-card">
+        
+        <div class="don-header">
+            <div class="don-icon">
+                <i class="fas fa-hand-holding-heart"></i>
+            </div>
+            <h2>Enregistrer un don</h2>
+            <p>Chaque don compte pour sauver des vies ❤️</p>
+        </div>
+        
+        <form method="POST" action="{% url 'enregistrer_don' %}">
+            {% csrf_token %}
+            
+            <div class="input-group-premium">
+                <select name="hopital" id="hopital" required>
+                    <option value="">-- Sélectionnez un hôpital --</option>
+                    {% for hopital in hopitaux %}
+                        <option value="{{ hopital.id }}">🏥 {{ hopital.nom }} - {{ hopital.ville }}</option>
+                    {% endfor %}
+                </select>
+                <span class="input-icon"><i class="fas fa-hospital"></i></span>
+            </div>
+            
+            <div class="info-alert">
+                <i class="fas fa-calendar-check"></i>
+                <div class="info-content">
+                    <h4>📅 Information importante</h4>
+                    <p>Le don sera enregistré avec la date d'aujourd'hui : <strong>{{ aujourdhui|date:"d/m/Y" }}</strong></p>
+                </div>
+            </div>
+            
+            <div class="btn-group">
+                <button type="submit" class="btn-enregistrer">
+                    <i class="fas fa-save"></i> Enregistrer le don
+                </button>
+                <a href="{% url 'dashboard_donneur' %}" class="btn-annuler">
+                    <i class="fas fa-times"></i> Annuler
+                </a>
+            </div>
+        </form>
+        
+        <div class="motivation-message">
+            <i class="fas fa-heartbeat"></i>
+            <p>❤️ Un don peut sauver jusqu'à 3 vies</p>
+            <p style="font-size: 11px; margin-top: 8px;">Votre geste compte. Merci pour votre générosité !</p>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

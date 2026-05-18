@@ -1,0 +1,304 @@
+
+{% extends 'dondesong/base.html' %}
+{% block title %}Campagnes de don — DonDeSong{% endblock %}
+
+{% block extra_style %}
+<style>
+    .campagnes-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 30px 20px;
+    }
+    
+    .header-campagnes {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .header-campagnes h2 {
+        color: #c0392b;
+        margin: 0;
+        font-size: 28px;
+    }
+    
+    .btn-back {
+        background: #6b7280;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 50px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .btn-back:hover {
+        background: #4b5563;
+        transform: translateY(-2px);
+    }
+    
+    .grid-campagnes {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 25px;
+    }
+    
+    .card-campagne {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        border-left: 4px solid #c0392b;
+    }
+    
+    .card-campagne:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+    }
+    
+    .campagne-title {
+        color: #c0392b;
+        font-size: 20px;
+        font-weight: 700;
+        margin: 0 0 15px 0;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #f3f4f6;
+    }
+    
+    .campagne-info {
+        margin: 12px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #4b5563;
+        font-size: 14px;
+    }
+    
+    .campagne-info i {
+        width: 20px;
+        color: #c0392b;
+    }
+    
+    .badge-complet {
+        background: #fee2e2;
+        color: #dc2626;
+        padding: 5px 12px;
+        border-radius: 50px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+    
+    .badge-disponible {
+        background: #d1fae5;
+        color: #10b981;
+        padding: 5px 12px;
+        border-radius: 50px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+    
+    .badge-inscrit {
+        background: #dbeafe;
+        color: #3b82f6;
+        padding: 8px 15px;
+        border-radius: 50px;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-block;
+    }
+    
+    .btn-inscrire {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 10px 25px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        margin-top: 15px;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .btn-inscrire:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-inscrit {
+        background: #27ae60;
+        color: white;
+        padding: 10px 25px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 15px;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .btn-inscrit:hover {
+        background: #219a52;
+    }
+    
+    .btn-complet {
+        background: #9ca3af;
+        color: white;
+        padding: 10px 25px;
+        border-radius: 50px;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 15px;
+        width: 100%;
+        justify-content: center;
+        cursor: not-allowed;
+        border: none;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 20px;
+        color: #9ca3af;
+    }
+    
+    .empty-state i {
+        font-size: 60px;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+    
+    @media (max-width: 768px) {
+        .grid-campagnes {
+            grid-template-columns: 1fr;
+        }
+        
+        .header-campagnes {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="campagnes-container">
+
+    <div class="header-campagnes">
+        <h2>
+            <i class="fas fa-calendar-alt"></i> Campagnes de collecte
+        </h2>
+        <a href="{% url 'dashboard_donneur' %}" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Mon tableau de bord
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="background: {% if message.tags == 'success' %}#d1fae5{% elif message.tags == 'error' %}#fee2e2{% else %}#fef3c7{% endif %}; padding: 15px 20px; border-radius: 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+                <span>{{ message }}</span>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if campagnes %}
+        <div class="grid-campagnes">
+            {% for campagne in campagnes %}
+            
+            <!-- Calcul des places restantes -->
+            {% with inscrits=campagne.inscription_set.count %}
+            {% with places_restantes=campagne.capacite_totale|add:"-0" %}
+            {% with restantes=places_restantes|add:inscrits %}
+            
+            <div class="card-campagne">
+                <h3 class="campagne-title">
+                    <i class="fas fa-hand-holding-heart"></i> {{ campagne.nom }}
+                </h3>
+                
+                <div class="campagne-info">
+                    <i class="fas fa-calendar"></i>
+                    <span>Date : <strong>{{ campagne.date|date:"d/m/Y" }}</strong></span>
+                </div>
+                
+                <div class="campagne-info">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Lieu : {{ campagne.lieu }}</span>
+                </div>
+                
+                <div class="campagne-info">
+                    <i class="fas fa-hospital"></i>
+                    <span>Organisée par : {{ campagne.hopital.nom }}</span>
+                </div>
+                
+                <div class="campagne-info">
+                    <i class="fas fa-tint"></i>
+                    <span>Groupes ciblés : {{ campagne.groupes_cibles }}</span>
+                </div>
+                
+                <div class="campagne-info">
+                    <i class="fas fa-users"></i>
+                    <span>Places disponibles : 
+                        {% if restantes > 0 %}
+                            <span class="badge-disponible">✅ {{ restantes }} places restantes</span>
+                        {% else %}
+                            <span class="badge-complet">❌ Complet</span>
+                        {% endif %}
+                    </span>
+                </div>
+                
+                {% if campagne.id in deja_inscrit_ids %}
+                    <div class="campagne-info">
+                        <span class="badge-inscrit">
+                            <i class="fas fa-check-circle"></i> Vous êtes déjà inscrit
+                        </span>
+                    </div>
+                    <a href="{% url 'mes_inscriptions' %}" class="btn-inscrit">
+                        <i class="fas fa-list"></i> Voir mes inscriptions
+                    </a>
+                {% else %}
+                    {% if restantes > 0 %}
+                        <a href="{% url 'inscription_campagne' campagne.id %}" class="btn-inscrire">
+                            <i class="fas fa-calendar-plus"></i> S'inscrire
+                        </a>
+                    {% else %}
+                        <button class="btn-complet" disabled>
+                            <i class="fas fa-ban"></i> Complet
+                        </button>
+                    {% endif %}
+                {% endif %}
+            </div>
+            
+            {% endwith %}
+            {% endwith %}
+            {% endwith %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-calendar-times"></i>
+            <h3>Aucune campagne disponible</h3>
+            <p>Revenez bientôt pour découvrir les prochaines collectes !</p>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

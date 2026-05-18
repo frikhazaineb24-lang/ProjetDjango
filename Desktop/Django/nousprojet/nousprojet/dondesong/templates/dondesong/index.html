@@ -1,0 +1,84 @@
+{% extends 'dondesong/base.html' %}
+{% block title %}Accueil - DonDeSang{% endblock %}
+
+{% block content %}
+<div class="container-home">
+    <!-- HERO BANNER -->
+    <div class="hero-banner">
+        <h1>🩸 Bienvenue sur DonDeSang</h1>
+        <p>La plateforme nationale de gestion des dons de sang - Connectez donneurs et établissements de santé</p>
+        <div class="hero-buttons">
+            {% if not user.is_authenticated %}
+                <a href="{% url 'inscription_donneur' %}" class="btn-primary-hero">
+                    <i class="fas fa-user-plus"></i> Je suis Donneur
+                </a>
+                <a href="{% url 'inscription_hopital' %}" class="btn-secondary-hero">
+                    <i class="fas fa-hospital"></i> Je suis Établissement
+                </a>
+            {% else %}
+                <a href="{% url 'home' %}" class="btn-primary-hero">
+                    <i class="fas fa-home"></i> Tableau de Bord
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- FEATURES -->
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-user-check"></i></div>
+            <h3>Profil Donneur</h3>
+            <p>Créez votre profil, partagez votre groupe sanguin et restez informé des demandes d'urgence.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-bell"></i></div>
+            <h3>Demandes Urgentes</h3>
+            <p>Recevez des notifications en cas d'appel urgent pour les groupes sanguins compatibles.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-calendar-check"></i></div>
+            <h3>Campagnes</h3>
+            <p>Participez à des campagnes de collecte organisées près de chez vous.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-history"></i></div>
+            <h3>Historique</h3>
+            <p>Suivez votre historique complet de dons et votre éligibilité pour le prochain don.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-hospital"></i></div>
+            <h3>Gestion Hôpital</h3>
+            <p>Créez des demandes urgentes, organisez des campagnes et gérez les réponses.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-chart-pie"></i></div>
+            <h3>Statistiques</h3>
+            <p>Accédez à des statistiques en temps réel sur les dons et les campagnes.</p>
+        </div>
+    </div>
+
+    <!-- INFO SECTION -->
+    <div class="info-section">
+        <h2>À Propos</h2>
+        <p>
+            <strong>DonDeSang</strong> est une plateforme collaborative de gestion des dons de sang qui facilite la connexion 
+            entre donneurs volontaires et établissements de santé. Notre mission est de sauver des vies en rendant le processus 
+            de donation de sang plus simple et plus efficace.
+        </p>
+        <div class="info-grid">
+            <div class="info-card">
+                <h4>🎯 Notre Mission</h4>
+                <p>Sauver des vies par la donation de sang</p>
+            </div>
+            <div class="info-card">
+                <h4>🤝 Collaboration</h4>
+                <p>Connecter donneurs et établissements</p>
+            </div>
+            <div class="info-card">
+                <h4>⚡ Efficacité</h4>
+                <p>Processus rapide et transparent</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

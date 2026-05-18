@@ -1,0 +1,952 @@
+{% extends 'dondesong/base.html' %}
+{% block title %}DonDeSong — Modifier une demande urgente{% endblock %}
+
+{% block extra_style %}
+<style>
+  /* ═══════════════════════════════
+     ANIMATIONS
+  ═══════════════════════════════ */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse-anim {
+    0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,.5); }
+    50%      { box-shadow: 0 0 0 8px rgba(239,68,68,0); }
+  }
+  @keyframes pulse-green {
+    0%,100% { box-shadow: 0 0 0 0 rgba(16,185,129,.4); }
+    50%      { box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+  }
+
+  /* ═══════════════════════════════
+     LAYOUT WRAPPER
+  ═══════════════════════════════ */
+  .mod-wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 36px 20px 60px;
+  }
+
+  /* ═══════════════════════════════
+     MESSAGES SUCCESS/ERROR
+  ═══════════════════════════════ */
+  .msg-success {
+    display: flex; align-items: center; gap: 12px;
+    background: #ECFDF5; border: 1px solid #A7F3D0;
+    border-left: 4px solid #10B981;
+    border-radius: 14px; padding: 14px 20px;
+    margin-bottom: 24px; font-size: 14px; font-weight: 500; color: #065F46;
+    animation: fadeUp .4s ease both;
+  }
+  .msg-error {
+    display: flex; align-items: center; gap: 12px;
+    background: #FEF2F2; border: 1px solid #FECACA;
+    border-left: 4px solid #EF4444;
+    border-radius: 14px; padding: 14px 20px;
+    margin-bottom: 24px; font-size: 14px; font-weight: 500; color: #B91C1C;
+    animation: fadeUp .4s ease both;
+  }
+
+  /* ═══════════════════════════════
+     PAGE HEADER
+  ═══════════════════════════════ */
+  .page-hdr {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 20px; margin-bottom: 32px; flex-wrap: wrap;
+    animation: fadeUp .5s ease both;
+  }
+  .page-eyebrow {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E;
+    border-radius: 999px; padding: 4px 14px;
+    font-size: 11px; font-weight: 700; letter-spacing: .5px;
+    text-transform: uppercase; margin-bottom: 10px;
+  }
+  .page-title {
+    font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800;
+    color: var(--text); display: flex; align-items: center; gap: 14px; margin-bottom: 5px;
+  }
+  .title-icon {
+    width: 46px; height: 46px; border-radius: 14px; flex-shrink: 0;
+    background: linear-gradient(135deg, #FFFBEB, #FDE68A);
+    border: 1px solid #FDE68A;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: var(--amber);
+  }
+  .page-sub { font-size: 14px; color: var(--text-3); }
+
+  .btn-back {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--white); border: 1.5px solid var(--border-soft);
+    color: var(--text-2); padding: 10px 22px; border-radius: 999px;
+    font-size: 13px; font-weight: 600; text-decoration: none; transition: all .2s; flex-shrink: 0;
+  }
+  .btn-back:hover {
+    border-color: var(--primary-mid); color: var(--primary); background: var(--primary-light);
+  }
+
+  /* ═══════════════════════════════
+     FORM CARD
+  ═══════════════════════════════ */
+  .form-card {
+    background: var(--white); border: 1px solid var(--border-soft);
+    border-radius: 24px; overflow: hidden;
+    box-shadow: 0 8px 32px rgba(108,43,217,.12);
+    animation: fadeUp .5s .1s ease both;
+    margin-bottom: 36px;
+  }
+
+  /* Card header gradient */
+  .form-card-header {
+    background: linear-gradient(135deg, #3D1580 0%, #6C2BD9 50%, #E02040 100%);
+    padding: 26px 32px; position: relative; overflow: hidden;
+  }
+  .form-card-header::before {
+    content: ''; position: absolute; top: -60px; right: -60px;
+    width: 180px; height: 180px; border-radius: 50%; background: rgba(255,255,255,.07);
+  }
+  .form-card-header::after {
+    content: ''; position: absolute; bottom: -40px; left: 120px;
+    width: 100px; height: 100px; border-radius: 50%; background: rgba(255,255,255,.05);
+  }
+  .fch-title {
+    font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: white;
+    position: relative; z-index: 1; display: flex; align-items: center; gap: 10px;
+    margin-bottom: 4px;
+  }
+  .fch-sub {
+    color: rgba(255,255,255,.7); font-size: 13px; position: relative; z-index: 1;
+  }
+  .fch-status {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25);
+    backdrop-filter: blur(8px); color: white;
+    padding: 4px 14px; border-radius: 999px; font-size: 12px; font-weight: 600;
+    margin-top: 10px; position: relative; z-index: 1;
+  }
+
+  /* ═══════════════════════════════
+     FORM BODY
+  ═══════════════════════════════ */
+  .form-body { padding: 32px; }
+
+  /* Urgency live banner */
+  .urgency-banner {
+    background: linear-gradient(135deg, #FEF2F2, #FEE2E2);
+    border: 1.5px solid #FECACA; border-radius: 14px;
+    padding: 14px 18px; margin-bottom: 28px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .upulse {
+    width: 12px; height: 12px; border-radius: 50%; background: #EF4444;
+    flex-shrink: 0; animation: pulse-anim 1.5s ease infinite;
+  }
+  .utext { font-size: 13px; font-weight: 600; color: #B91C1C; }
+  .utext span { font-weight: 400; color: #DC2626; }
+
+  /* Grid layout */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .form-group { display: flex; flex-direction: column; }
+  .form-group.full { grid-column: span 2; }
+  .form-section-title {
+    grid-column: span 2; font-size: 11px; font-weight: 700; color: var(--text-3);
+    letter-spacing: 1px; text-transform: uppercase;
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 4px;
+  }
+  .form-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border-soft); }
+
+  /* Labels */
+  .f-label {
+    font-size: 12px; font-weight: 700; color: var(--text-2);
+    letter-spacing: .4px; text-transform: uppercase; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .f-label i { color: var(--primary); font-size: 13px; }
+  .f-label .req { color: var(--red, #EF4444); font-size: 15px}
+
+  /* Inputs */
+  .f-input, .f-select, .f-textarea {
+    width: 100%; padding: 13px 16px;
+    background: #F7F5FB; border: 1.5px solid var(--border-soft);
+    border-radius: 14px; font-family: 'Inter', sans-serif;
+    font-size: 14px; color: var(--text);
+    transition: all .25s; outline: none;
+    appearance: none; -webkit-appearance: none;
+  }
+  .f-input:focus, .f-select:focus, .f-textarea:focus {
+    border-color: var(--primary); background: white;
+    box-shadow: 0 0 0 4px rgba(108,43,217,.1);
+  }
+  .f-input:hover, .f-select:hover, .f-textarea:hover {
+    border-color: var(--primary-mid); background: white;
+  }
+  .f-textarea { min-height: 140px; resize: vertical; line-height: 1.6; }
+
+  /* Blood group special */
+  .f-select.blood {
+    border-color: #FFCDD5 !important; background: #FFF0F3 !important;
+    color: #E02040 !important; font-weight: 700 !important; font-size: 15px !important;
+  }
+  .f-select.blood:focus {
+    border-color: #E02040 !important; background: white !important;
+    box-shadow: 0 0 0 4px rgba(224,32,64,.1) !important;
+  }
+
+  /* Select arrow */
+  .sel-wrap { position: relative; }
+  .sel-wrap::after {
+    content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
+    position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+    color: var(--text-3); font-size: 11px; pointer-events: none;
+  }
+
+  /* Input with icon */
+  .ico-wrap { position: relative; }
+  .ico-wrap .f-input { padding-left: 44px; }
+  .field-ico {
+    position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+    color: var(--text-3); font-size: 14px; pointer-events: none;
+  }
+
+  /* Status display field */
+  .status-display {
+    padding: 13px 16px; background: #ECFDF5; border: 1.5px solid #A7F3D0;
+    border-radius: 14px; display: flex; align-items: center; gap: 10px;
+  }
+  .status-dot-green {
+    width: 10px; height: 10px; border-radius: 50%; background: #10B981;
+    flex-shrink: 0; animation: pulse-green 2s ease infinite;
+  }
+
+  /* Helper */
+  .f-helper {
+    font-size: 11px; color: var(--text-3); margin-top: 6px;
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  /* ═══════════════════════════════
+     FORM ACTIONS
+  ═══════════════════════════════ */
+  .form-actions {
+    padding: 20px 32px 28px; border-top: 1px solid var(--border-soft);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 14px; flex-wrap: wrap;
+  }
+  .fa-left { display: flex; gap: 12px; }
+
+  .btn-save {
+    display: inline-flex; align-items: center; gap: 9px;
+    background: linear-gradient(135deg, #E02040, #F43F7F);
+    color: white; padding: 13px 32px; border-radius: 999px;
+    font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700;
+    border: none; cursor: pointer; transition: all .3s;
+    box-shadow: 0 6px 20px rgba(224,32,64,.3);
+  }
+  .btn-save:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(224,32,64,.42); }
+  .btn-save:active { transform: translateY(0); }
+
+  .btn-cancel {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--white); border: 1.5px solid var(--border-soft);
+    color: var(--text-2); padding: 12px 24px; border-radius: 999px;
+    font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s;
+    font-family: 'Inter', sans-serif; text-decoration: none;
+  }
+  .btn-cancel:hover { border-color: #E02040; color: #E02040; background: #FFF0F3; }
+
+  .btn-cloturer {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: #F7F5FB; border: 1.5px solid #FECACA; color: #EF4444;
+    padding: 12px 20px; border-radius: 999px; font-size: 13px; font-weight: 700;
+    cursor: pointer; font-family: 'Inter', sans-serif; transition: all .2s;
+  }
+  .btn-cloturer:hover { background: #EF4444; color: white; border-color: #EF4444; }
+
+  /* ═══════════════════════════════
+     CAMPAGNES SECTION
+  ═══════════════════════════════ */
+  .camp-section {
+    animation: fadeUp .5s .2s ease both;
+  }
+  .section-hdr {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 20px; padding-bottom: 14px;
+    border-bottom: 2px solid var(--border-soft);
+  }
+  .section-hdr h3 {
+    font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--text);
+  }
+  .sdot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--pink)); flex-shrink: 0;
+  }
+  .scnt {
+    background: var(--primary-light); color: var(--primary);
+    font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px;
+  }
+  .btn-creer {
+    margin-left: auto; display: inline-flex; align-items: center; gap: 7px;
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+    color: white; padding: 9px 20px; border-radius: 999px;
+    font-size: 13px; font-weight: 700; text-decoration: none;
+    box-shadow: 0 4px 14px rgba(245,158,11,.3); transition: all .2s;
+  }
+  .btn-creer:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(245,158,11,.4); color: white; }
+
+  /* Campaign card */
+  .camp-card {
+    background: var(--white); border: 1px solid var(--border-soft);
+    border-radius: 18px; overflow: hidden; margin-bottom: 14px;
+    transition: all .3s; box-shadow: 0 2px 12px rgba(108,43,217,.07);
+  }
+  .camp-card:hover { transform: translateY(-4px); box-shadow: 0 8px 32px rgba(108,43,217,.13); border-color: #FDE68A; }
+  .camp-top-bar {
+    height: 4px;
+    background: linear-gradient(90deg, #F59E0B, #FCD34D, #10B981);
+  }
+  .camp-body { padding: 20px 24px; }
+  .camp-row-1 {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 14px; flex-wrap: wrap; margin-bottom: 12px;
+  }
+  .camp-name {
+    font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800;
+    color: var(--text); display: flex; align-items: center; gap: 8px;
+  }
+  .camp-date-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E;
+    padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; flex-shrink: 0;
+  }
+  .camp-meta {
+    display: flex; align-items: center; gap: 20px; margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .camp-meta-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-2); }
+  .camp-meta-item i { color: #F59E0B; font-size: 13px; }
+  .camp-meta-item.loc i { color: #E02040; }
+
+  /* Progress bar */
+  .prog-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .prog-lbl { font-size: 12px; font-weight: 600; color: var(--text-2); }
+  .prog-cnt { font-size: 12px; font-weight: 700; color: var(--primary); }
+  .prog-bar { height: 8px; background: #F7F5FB; border-radius: 20px; overflow: hidden; border: 1px solid var(--border-soft); }
+  .prog-fill { height: 100%; border-radius: 20px; background: linear-gradient(90deg, #F59E0B, #10B981); transition: width 1s ease; }
+  .prog-sub { display: flex; justify-content: space-between; margin-top: 5px; font-size: 11px; color: var(--text-3); }
+
+  /* Card footer actions */
+  .camp-footer {
+    padding: 14px 24px; border-top: 1px solid var(--border-soft);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap; background: #F7F5FB;
+  }
+  .chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700;
+  }
+  .chip-empty { background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; }
+  .chip-active { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+  .chip-full  { background: #FEF2F2; color: #B91C1C; border: 1px solid #FECACA; }
+
+  .camp-btns { display: flex; gap: 8px; }
+  .btn-modif-camp {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--primary-light); color: var(--primary);
+    border: 1px solid var(--primary-mid); padding: 8px 16px; border-radius: 999px;
+    font-size: 12px; font-weight: 600; text-decoration: none; transition: all .2s;
+  }
+  .btn-modif-camp:hover { background: var(--primary); color: white; }
+  .btn-suppr-camp {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #FEF2F2; color: #EF4444; border: 1px solid #FECACA;
+    padding: 8px 16px; border-radius: 999px; font-size: 12px; font-weight: 600;
+    text-decoration: none; transition: all .2s; cursor: pointer; font-family: inherit;
+  }
+  .btn-suppr-camp:hover { background: #EF4444; color: white; }
+
+  /* THE DETAIL BUTTON */
+  .btn-detail {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+    color: white; padding: 9px 20px; border-radius: 999px;
+    font-size: 13px; font-weight: 700; text-decoration: none;
+    box-shadow: 0 4px 12px rgba(245,158,11,.3); transition: all .3s;
+    border: none; cursor: pointer; font-family: 'Inter', sans-serif;
+  }
+  .btn-detail:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(245,158,11,.45); color: white; }
+
+  /* ═══════════════════════════════
+     MODAL DÉTAILS CAMPAGNE
+  ═══════════════════════════════ */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(26,19,51,.75);
+    backdrop-filter: blur(8px); z-index: 500;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+    opacity: 0; pointer-events: none; transition: opacity .3s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal-box {
+    background: white; border-radius: 24px; width: 100%; max-width: 600px;
+    overflow: hidden; box-shadow: 0 40px 100px rgba(0,0,0,.3);
+    transform: scale(.92) translateY(30px); transition: all .35s cubic-bezier(.4,0,.2,1);
+  }
+  .modal-overlay.open .modal-box { transform: scale(1) translateY(0); }
+  .modal-hdr {
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+    padding: 22px 28px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-hdr-title {
+    font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: white;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .modal-close-btn {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.3);
+    color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 15px; transition: all .2s;
+  }
+  .modal-close-btn:hover { background: rgba(255,255,255,.35); }
+  .modal-body { padding: 28px; }
+  .modal-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+  .modal-info-cell {
+    background: #F7F5FB; border: 1px solid var(--border-soft);
+    border-radius: 14px; padding: 14px 16px;
+  }
+  .mic-label { font-size: 11px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 5px; }
+  .mic-value { font-size: 15px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 6px; }
+  .mic-value i { color: #F59E0B; }
+  .modal-inscr-title {
+    font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700;
+    color: var(--text); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+  }
+  .modal-inscr-title i { color: var(--primary); }
+  .no-inscr {
+    text-align: center; padding: 28px;
+    background: #F7F5FB; border: 1.5px dashed var(--border-soft); border-radius: 14px;
+  }
+  .no-inscr i { font-size: 32px; color: var(--text-3); margin-bottom: 10px; display: block; }
+  .no-inscr p { font-size: 13px; color: var(--text-3); }
+  .inscr-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; background: #F7F5FB; border-radius: 12px;
+    border: 1px solid var(--border-soft); margin-bottom: 8px;
+  }
+  .inscr-av {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--primary), #F43F7F);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .inscr-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .inscr-date { font-size: 11px; color: var(--text-3); }
+  .inscr-blood {
+    margin-left: auto; background: #FFF0F3; color: #E02040;
+    border: 1px solid #FFCDD5; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+  }
+  .modal-footer { padding: 16px 28px; border-top: 1px solid var(--border-soft); display: flex; justify-content: flex-end; gap: 10px; }
+
+  /* ═══════════════════════════════
+     TOAST
+  ═══════════════════════════════ */
+  .bc-toast {
+    position: fixed; top: 80px; right: 28px; z-index: 9999;
+    background: white; border: 1px solid #A7F3D0; border-left: 4px solid #10B981;
+    border-radius: 14px; padding: 14px 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.15);
+    display: flex; align-items: center; gap: 12px; min-width: 300px;
+    transform: translateX(120%); transition: transform .4s cubic-bezier(.4,0,.2,1);
+  }
+  .bc-toast.show { transform: translateX(0); }
+  .bc-toast i { color: #10B981; font-size: 20px; }
+  .bc-toast-title { font-size: 14px; font-weight: 700; color: var(--text); }
+  .bc-toast-sub { font-size: 12px; color: var(--text-3); }
+
+  /* ═══════════════════════════════
+     EMPTY CAMP STATE
+  ═══════════════════════════════ */
+  .empty-camp {
+    background: white; border: 2px dashed #FDE68A;
+    border-radius: 20px; padding: 48px; text-align: center;
+  }
+  .empty-camp i { font-size: 44px; color: #FDE68A; margin-bottom: 14px; display: block; }
+  .empty-camp h4 { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .empty-camp p { font-size: 13px; color: var(--text-3); margin-bottom: 20px; }
+
+  /* ═══════════════════════════════
+     RESPONSIVE
+  ═══════════════════════════════ */
+  @media (max-width: 768px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .form-group.full { grid-column: span 1; }
+    .form-section-title { display: none; }
+    .modal-info-grid { grid-template-columns: 1fr; }
+    .form-actions { flex-direction: column; align-items: stretch; }
+    .fa-left { flex-direction: column; }
+    .btn-save, .btn-cancel, .btn-cloturer { justify-content: center; }
+    .page-hdr { flex-direction: column; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="mod-wrap">
+
+  {# ── DJANGO MESSAGES ── #}
+  {% if messages %}
+    {% for message in messages %}
+      <div class="{% if message.tags == 'error' %}msg-error{% else %}msg-success{% endif %}">
+        <i class="fas fa-{% if message.tags == 'error' %}circle-xmark{% else %}circle-check{% endif %}"></i>
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  {# ── PAGE HEADER ── #}
+  <div class="page-hdr">
+    <div>
+      <div class="page-eyebrow">
+        <i class="fas fa-pen-to-square"></i> Modification de demande
+      </div>
+      <div class="page-title">
+        <div class="title-icon"><i class="fas fa-pen"></i></div>
+        Modifier la demande
+      </div>
+      <div class="page-sub">Mettez à jour les informations de votre demande urgente</div>
+    </div>
+    <a href="{% url 'dashboard_hopital' %}" class="btn-back">
+      <i class="fas fa-arrow-left"></i> Retour au dashboard
+    </a>
+  </div>
+
+  {# ── FORM CARD ── #}
+  <div class="form-card">
+
+    {# Card header #}
+    <div class="form-card-header">
+      <div class="fch-title">
+        <i class="fas fa-triangle-exclamation"></i>
+        Demande urgente — {{ demande.groupe_sanguin }}
+      </div>
+      <div class="fch-sub">
+        Hôpital {{ hopital.nom }} · Délai actuel : {{ demande.delai|date:"d/m/Y" }}
+      </div>
+      <span class="fch-status">
+        <i class="fas fa-circle" style="font-size:7px; color:#4ADE80;"></i>
+        Statut : {{ demande.statut|capfirst }}
+      </span>
+    </div>
+
+    {# Form body #}
+    <div class="form-body">
+
+      {# Live urgency indicator #}
+      <div class="urgency-banner">
+        <div class="upulse"></div>
+        <div class="utext">
+          Demande active —
+          <span>les donneurs compatibles peuvent voir et répondre à cette demande en ce moment.</span>
+        </div>
+      </div>
+
+      {# THE ACTUAL DJANGO FORM #}
+      <form method="POST" id="modifyForm">
+        {% csrf_token %}
+
+        <div class="form-grid">
+
+          {# Groupe sanguin (disabled - non modifiable) #}
+          <div class="form-group">
+            <label class="f-label">
+              <i class="fas fa-tint"></i> Groupe sanguin
+            </label>
+            <div class="sel-wrap">
+              <input type="text" class="f-input f-select blood"
+                     value="{{ demande.groupe_sanguin }}" disabled
+                     style="cursor:not-allowed; opacity:.85;">
+            </div>
+            <div class="f-helper">
+              <i class="fas fa-lock"></i> Le groupe sanguin n'est pas modifiable après création
+            </div>
+          </div>
+
+          {# Quantité #}
+          <div class="form-group">
+            <label for="quantite" class="f-label">
+              <i class="fas fa-flask"></i> Quantité (en mL) <span class="req">*</span>
+            </label>
+            <div class="ico-wrap">
+              <i class="fas fa-droplet field-ico"></i>
+              <input type="number" name="quantite" id="quantite" class="f-input"
+                     value="{{ demande.quantite }}" required min="100" step="100"
+                     placeholder="ex: 450">
+            </div>
+            <div class="f-helper">
+              <i class="fas fa-circle-info"></i> Quantité en millilitres nécessaire
+            </div>
+          </div>
+
+          {# Section separator #}
+          <div class="form-section-title">
+            <i class="fas fa-calendar-days"></i> Informations temporelles
+          </div>
+
+          {# Date limite #}
+          <div class="form-group">
+            <label for="delai" class="f-label">
+              <i class="fas fa-calendar-check"></i> Date limite <span class="req">*</span>
+            </label>
+            <div class="ico-wrap">
+              <i class="fas fa-calendar field-ico"></i>
+              <input type="date" name="delai" id="delai" class="f-input"
+                     value="{{ demande.delai|date:'Y-m-d' }}" required>
+            </div>
+            <div class="f-helper">
+              <i class="fas fa-triangle-exclamation" style="color:#F59E0B;"></i>
+              La demande sera clôturée automatiquement après cette date
+            </div>
+          </div>
+
+          {# Statut actuel (affichage) #}
+          <div class="form-group">
+            <label class="f-label"><i class="fas fa-circle-dot"></i> Statut actuel</label>
+            <div class="status-display">
+              <div class="status-dot-green"></div>
+              <span style="font-size:14px; font-weight:700; color:#065F46;">
+                Active — visible par les donneurs
+              </span>
+            </div>
+            <div class="f-helper">
+              <i class="fas fa-circle-info"></i> Pour changer le statut, utilisez "Clôturer"
+            </div>
+          </div>
+
+          {# Description #}
+          <div class="form-group full">
+            <label for="description" class="f-label">
+              <i class="fas fa-align-left"></i> Description <span class="req">*</span>
+            </label>
+            <textarea name="description" id="description" class="f-textarea"
+                      placeholder="Décrivez la situation médicale, l'urgence, les coordonnées de contact...&#10;Ex : Patient en soins intensifs après un accident, nécessite une transfusion urgente avant 20h."
+                      required>{{ demande.description }}</textarea>
+            <div class="f-helper">
+              <i class="fas fa-circle-info"></i>
+              Une description précise aide les donneurs à comprendre l'urgence
+            </div>
+          </div>
+
+        </div>{# end form-grid #}
+      </form>
+
+    </div>{# end form-body #}
+
+    {# Form actions #}
+    <div class="form-actions">
+      <div class="fa-left">
+        <button type="submit" form="modifyForm" class="btn-save">
+          <i class="fas fa-floppy-disk"></i> Enregistrer les modifications
+        </button>
+        <a href="{% url 'dashboard_hopital' %}" class="btn-cancel">
+          <i class="fas fa-times"></i> Annuler
+        </a>
+      </div>
+      <a href="{% url 'cloturer_demande' demande.id %}"
+         class="btn-cloturer"
+         onclick="return confirm('Êtes-vous sûr de vouloir clôturer cette demande ?')">
+        <i class="fas fa-ban"></i> Clôturer la demande
+      </a>
+    </div>
+
+  </div>{# end form-card #}
+
+
+  {# ═══════════════════════════════════
+     CAMPAGNES DE COLLECTE
+  ═══════════════════════════════════ #}
+  <div class="camp-section">
+    <div class="section-hdr">
+      <div class="sdot"></div>
+      <h3>Mes campagnes de collecte</h3>
+      {% if campagnes %}
+        <span class="scnt">{{ campagnes|length }}</span>
+      {% endif %}
+      <a href="{% url 'creer_campagne' %}" class="btn-creer">
+        <i class="fas fa-plus"></i> Créer une campagne
+      </a>
+    </div>
+
+    {% if campagnes %}
+      {% for campagne in campagnes %}
+
+      {# Calcul du pourcentage #}
+      {% with inscrits=campagne.inscription_set.count %}
+      {% with pct=inscrits|floatformat:0 %}
+
+      <div class="camp-card">
+        <div class="camp-top-bar"></div>
+        <div class="camp-body">
+
+          <div class="camp-row-1">
+            <div class="camp-name">
+              <i class="fas fa-hand-holding-heart"></i>
+              {{ campagne.nom }}
+            </div>
+            <div class="camp-date-pill">
+              <i class="fas fa-calendar"></i> {{ campagne.date|date:"d/m/Y" }}
+            </div>
+          </div>
+
+          <div class="camp-meta">
+            <div class="camp-meta-item loc">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>{{ campagne.lieu }}</span>
+            </div>
+            <div class="camp-meta-item">
+              <i class="fas fa-users"></i>
+              <span>Capacité : {{ campagne.capacite_totale }} personnes</span>
+            </div>
+          </div>
+
+          <div>
+            <div class="prog-hdr">
+              <span class="prog-lbl">Inscriptions</span>
+              <span class="prog-cnt">{{ inscrits }} / {{ campagne.capacite_totale }}</span>
+            </div>
+            <div class="prog-bar">
+              {% if campagne.capacite_totale > 0 %}
+                <div class="prog-fill"
+                     style="width: {% widthratio inscrits campagne.capacite_totale 100 %}%">
+                </div>
+              {% else %}
+                <div class="prog-fill" style="width:0%"></div>
+              {% endif %}
+            </div>
+            <div class="prog-sub">
+              <span>
+                {% if campagne.capacite_totale > 0 %}
+                  {% widthratio inscrits campagne.capacite_totale 100 %}% rempli
+                {% else %}
+                  0% rempli
+                {% endif %}
+              </span>
+              <span>{{ campagne.capacite_totale|add:"-"|add:inscrits }} places libres</span>
+            </div>
+          </div>
+
+        </div>{# end camp-body #}
+
+        <div class="camp-footer">
+          <div>
+            {% if inscrits == 0 %}
+              <span class="chip chip-empty">
+                <i class="fas fa-circle" style="font-size:6px;"></i> Aucune inscription
+              </span>
+            {% elif inscrits >= campagne.capacite_totale %}
+              <span class="chip chip-full">
+                <i class="fas fa-circle" style="font-size:6px;"></i> Complet
+              </span>
+            {% else %}
+              <span class="chip chip-active">
+                <i class="fas fa-circle" style="font-size:6px;"></i> {{ inscrits }} inscrit(s)
+              </span>
+            {% endif %}
+          </div>
+          <div class="camp-btns">
+            <a href="{% url 'modifier_campagne' campagne.id %}" class="btn-modif-camp">
+              <i class="fas fa-pen"></i> Modifier
+            </a>
+            <a href="{% url 'supprimer_campagne' campagne.id %}" class="btn-suppr-camp"
+               onclick="return confirm('Supprimer cette campagne ?')">
+              <i class="fas fa-trash"></i> Supprimer
+            </a>
+            {# BOUTON DÉTAILS — ouvre la modale avec les vrais inscrits #}
+            <button class="btn-detail"
+                    onclick="openModal('{{ campagne.nom }}', '{{ campagne.date|date:'d/m/Y' }}', '{{ campagne.lieu }}', {{ inscrits }}, {{ campagne.capacite_totale }}, '{{ campagne.hopital.nom }}')">
+              <i class="fas fa-eye"></i> Voir les détails
+            </button>
+          </div>
+        </div>
+
+      </div>{# end camp-card #}
+
+      {% endwith %}
+      {% endwith %}
+      {% endfor %}
+
+    {% else %}
+      <div class="empty-camp">
+        <i class="fas fa-calendar-xmark"></i>
+        <h4>Aucune campagne créée</h4>
+        <p>Organisez votre première collecte de sang et mobilisez les donneurs.</p>
+        <a href="{% url 'creer_campagne' %}" class="btn-detail">
+          <i class="fas fa-plus-circle"></i> Créer ma première campagne
+        </a>
+      </div>
+    {% endif %}
+
+  </div>{# end camp-section #}
+
+</div>{# end mod-wrap #}
+
+
+{# ═══════════════════════════════════
+   MODAL DÉTAILS CAMPAGNE
+═══════════════════════════════════ #}
+<div class="modal-overlay" id="detailModal" onclick="if(event.target===this) closeModal()">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title">
+        <i class="fas fa-calendar-days"></i>
+        <span id="modal-camp-name">Détails campagne</span>
+      </div>
+      <button class="modal-close-btn" onclick="closeModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-info-grid">
+        <div class="modal-info-cell">
+          <div class="mic-label">📅 Date</div>
+          <div class="mic-value"><i class="fas fa-calendar"></i> <span id="modal-date">—</span></div>
+        </div>
+        <div class="modal-info-cell">
+          <div class="mic-label">📍 Lieu</div>
+          <div class="mic-value"><i class="fas fa-map-marker-alt"></i> <span id="modal-lieu">—</span></div>
+        </div>
+        <div class="modal-info-cell">
+          <div class="mic-label">👥 Inscrits</div>
+          <div class="mic-value" style="color:var(--primary);"><span id="modal-inscrits">0 / 0</span></div>
+        </div>
+        <div class="modal-info-cell">
+          <div class="mic-label">🏥 Organisateur</div>
+          <div class="mic-value" style="font-size:13px;"><span id="modal-hopital">—</span></div>
+        </div>
+      </div>
+
+      {# Progress dans modal #}
+      <div style="background:#F7F5FB;border:1px solid var(--border-soft);border-radius:14px;padding:16px;margin-bottom:20px;">
+        <div class="prog-hdr" style="margin-bottom:10px;">
+          <span style="font-size:13px;font-weight:700;color:var(--text);">Avancement des inscriptions</span>
+          <span style="font-size:13px;color:#F59E0B;font-weight:700;" id="modal-pct">0%</span>
+        </div>
+        <div class="prog-bar"><div class="prog-fill" id="modal-prog-fill" style="width:0%;"></div></div>
+        <div class="prog-sub">
+          <span id="modal-prog-sub-l">0 inscrit</span>
+          <span id="modal-prog-sub-r">0 places restantes</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="modal-inscr-title">
+          <i class="fas fa-users"></i> Liste des inscrits
+        </div>
+        {# Affichage des inscrits réels par campagne via Django #}
+        {% for campagne in campagnes %}
+          <div id="inscr-{{ campagne.id }}" style="display:none;">
+            {% for inscription in campagne.inscription_set.all %}
+              <div class="inscr-row">
+                <div class="inscr-av">
+                  {{ inscription.donneur.user.first_name|first|default:"D" }}
+                </div>
+                <div>
+                  <div class="inscr-name">
+                    {{ inscription.donneur.user.get_full_name|default:inscription.donneur.user.username }}
+                  </div>
+                  <div class="inscr-date">
+                    Inscrit le {{ inscription.date_inscription|date:"d/m/Y" }}
+                  </div>
+                </div>
+                <span class="inscr-blood">{{ inscription.donneur.groupe_sanguin }}</span>
+              </div>
+            {% empty %}
+              <div class="no-inscr">
+                <i class="fas fa-user-slash"></i>
+                <p>Aucun inscrit pour le moment — partagez votre campagne !</p>
+              </div>
+            {% endfor %}
+          </div>
+        {% endfor %}
+        <div id="modal-inscr-content"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button onclick="closeModal()" class="btn-cancel" style="padding:10px 20px;font-size:13px;">
+        <i class="fas fa-times"></i> Fermer
+      </button>
+    </div>
+  </div>
+</div>
+
+{# TOAST #}
+<div class="bc-toast" id="bc-toast">
+  <i class="fas fa-circle-check"></i>
+  <div>
+    <div class="bc-toast-title">Modifications enregistrées !</div>
+    <div class="bc-toast-sub">La demande a été mise à jour avec succès.</div>
+  </div>
+</div>
+
+<script>
+  // ── MODAL ──
+  let currentCampId = null;
+
+  function openModal(nom, date, lieu, inscrits, capacite, hopital, campId) {
+    document.getElementById('modal-camp-name').textContent = nom;
+    document.getElementById('modal-date').textContent = date;
+    document.getElementById('modal-lieu').textContent = lieu;
+    document.getElementById('modal-inscrits').textContent = inscrits + ' / ' + capacite;
+    document.getElementById('modal-hopital').textContent = hopital;
+
+    const pct = capacite > 0 ? Math.round((inscrits / capacite) * 100) : 0;
+    document.getElementById('modal-pct').textContent = pct + '%';
+
+    const fill = document.getElementById('modal-prog-fill');
+    fill.style.width = '0%';
+    setTimeout(() => { fill.style.width = pct + '%'; }, 100);
+
+    document.getElementById('modal-prog-sub-l').textContent = inscrits + ' inscrit(s)';
+    document.getElementById('modal-prog-sub-r').textContent = (capacite - inscrits) + ' places restantes';
+
+    // Afficher les inscrits de la bonne campagne
+    const content = document.getElementById('modal-inscr-content');
+    const src = campId ? document.getElementById('inscr-' + campId) : null;
+    content.innerHTML = src ? src.innerHTML : '<div class="no-inscr"><i class="fas fa-user-slash"></i><p>Aucun inscrit pour le moment.</p></div>';
+
+    document.getElementById('detailModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    document.getElementById('detailModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  // ── TOAST ──
+  {% if messages %}
+    {% for message in messages %}
+      {% if 'success' in message.tags %}
+        window.addEventListener('load', () => {
+          const t = document.getElementById('bc-toast');
+          t.classList.add('show');
+          setTimeout(() => t.classList.remove('show'), 3500);
+        });
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+  // ── PROGRESS BARS ──
+  window.addEventListener('load', () => {
+    document.querySelectorAll('.prog-fill').forEach(bar => {
+      const w = bar.style.width;
+      bar.style.width = '0%';
+      setTimeout(() => { bar.style.width = w; }, 400);
+    });
+  });
+</script>
+
+{% endblock %}

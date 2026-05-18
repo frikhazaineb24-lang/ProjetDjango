@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}DonDeSang - Plateforme de gestion des dons de sang{% endblock %}</title>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS personnalisé -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    
+    <!-- Styles supplémentaires -->
+    {% block extra_style %}{% endblock %}
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar-ultra">
+        <a href="{% url 'home' %}" class="logo-ultra" title="Accueil DonDeSang">
+            <div class="logo-icon-ultra">
+                <i class="fas fa-droplet"></i>
+            </div>
+            <div>
+                <span class="logo-text-ultra">DonDeSang</span>
+                <div class="logo-slogan-ultra">Sauver des vies</div>
+            </div>
+        </a>
+
+        <div class="nav-menu">
+            {% if user.is_authenticated %}
+                
+                <!-- MENU DONNEUR -->
+                {% if user.donneur %}
+                    <a href="{% url 'dashboard_donneur' %}" class="nav-item">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                    <a href="{% url 'liste_campagnes' %}" class="nav-item">
+                        <i class="fas fa-calendar-alt"></i> Campagnes
+                    </a>
+                    <a href="{% url 'mes_inscriptions' %}" class="nav-item">
+                        <i class="fas fa-clipboard-list"></i> Mes inscriptions
+                    </a>
+                    <a href="{% url 'enregistrer_don' %}" class="nav-item">
+                        <i class="fas fa-hand-holding-heart"></i> Don
+                    </a>
+                    <span class="role-badge">
+                        <i class="fas fa-user"></i> Donneur
+                    </span>
+
+                <!-- MENU HÔPITAL -->
+                {% elif user.hopital %}
+                    <a href="{% url 'dashboard_hopital' %}" class="nav-item">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                    <a href="{% url 'ajouter_demande' %}" class="nav-item">
+                        <i class="fas fa-bell"></i> Demande
+                    </a>
+                    <a href="{% url 'creer_campagne' %}" class="nav-item">
+                        <i class="fas fa-calendar-plus"></i> Campagne
+                    </a>
+                    <a href="{% url 'historique_demandes' %}" class="nav-item">
+                        <i class="fas fa-history"></i> Historique
+                    </a>
+                    <span class="role-badge">
+                        <i class="fas fa-hospital"></i> Hôpital
+                    </span>
+
+                <!-- MENU ADMIN -->
+                {% elif user.is_superuser %}
+                    <a href="{% url 'admin_dashboard' %}" class="nav-item">
+                        <i class="fas fa-chart-line"></i> Statistiques
+                    </a>
+                    <a href="/admin/" class="nav-item" target="_blank">
+                        <i class="fas fa-cog"></i> Admin Django
+                    </a>
+                    <span class="role-badge">
+                        <i class="fas fa-crown"></i> Admin
+                    </span>
+                {% endif %}
+
+                <!-- PROFILE UTILISATEUR -->
+                <div class="profile-menu">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <span class="profile-name">{{ user.first_name|default:user.username }}</span>
+                    <form action="{% url 'deconnexion' %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-item" title="Se déconnecter">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </form>
+                </div>
+
+            {% else %}
+                <!-- MENU VISITEUR -->
+                <a href="{% url 'connexion' %}" class="nav-item nav-login">
+                    <i class="fas fa-sign-in-alt"></i> Connexion
+                </a>
+                <a href="{% url 'inscription_donneur' %}" class="btn btn-primary" style="margin: 0 5px;">
+                    Donneur
+                </a>
+                <a href="{% url 'inscription_hopital' %}" class="btn btn-secondary">
+                    Hôpital
+                </a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- CONTAINER PRINCIPAL -->
+    <div class="main-container-ultra">
+        
+        <!-- MESSAGES DE NOTIFICATION -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible">
+                    <i class="fas fa-{{ message.tags|default:'info' }}"></i>
+                    {{ message }}
+                    <button type="button" class="close" onclick="this.parentElement.style.display='none';">&times;</button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- CONTENU PRINCIPAL -->
+        <div class="content-wrapper">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer-ultra">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3><i class="fas fa-droplet"></i> dondesang</h3>
+                <p>Plateforme de gestion des dons de sang</p>
+            </div>
+            <div class="footer-section">
+                <h4>Liens rapides</h4>
+                <ul>
+                    <li><a href="{% url 'home' %}">Accueil</a></li>
+                    <li><a href="{% url 'connexion' %}">Connexion</a></li>
+                    <li><a href="{% url 'inscription_donneur' %}">Inscription Donneur</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Information</h4>
+                <p>© 2026 dondesang. Tous droits réservés.</p>
+                <p>Plateforme de santé - Gestion des dons de sang</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 300);
+                }, 5000);
+            });
+        });
+    </script>
+    
+    {% block extra_script %}{% endblock %}
+</body>
+</html>
